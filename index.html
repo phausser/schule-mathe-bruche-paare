@@ -312,7 +312,6 @@
       for (let pairIdx = 0; pairIdx < pairCount; pairIdx++) {
         intendedPairs.push([signedFactors[pairIdx * 2], signedFactors[pairIdx * 2 + 1]]);
       }
-      if (intendedPairs.every((pair) => pairCancels(pair[0], pair[1])) === false) return generateTask();
       return { mixed, product, intendedPairs, pairCount };
     }
 
