@@ -234,6 +234,9 @@
       if (f.d === 1) return String(Math.abs(f.n));
       return Math.abs(f.n) + "/" + f.d;
     }
+    function signOf(n) {
+      return n < 0 ? -1 : 1;
+    }
     function escapeHtml(text) {
       return String(text)
         .replace(/&/g, "&amp;")
@@ -355,7 +358,9 @@
         if (!valid) continue;
 
         const signs = Array(factors.length).fill(1);
-        const negChoices = [0, 1, 1, 2, 2, Math.min(3, factors.length), Math.min(4, factors.length)];
+        const negChoices = [0, 1, 1, 2, 2];
+        if (pairCount >= 3) negChoices.push(3);
+        if (pairCount >= 4) negChoices.push(4);
         const negCount = Math.min(pick(negChoices), factors.length);
         const negIndexes = shuffle(factors.map((_, index) => index)).slice(0, negCount);
         negIndexes.forEach((index) => { signs[index] = -1; });
@@ -452,6 +457,36 @@
       return true;
     }
 
+    function isSignOnlyMismatch(valuesA, valuesB) {
+      if (valuesA.length !== valuesB.length) return false;
+      const groups = new Map();
+
+      valuesB.forEach((value) => {
+        const key = absFmt(value);
+        if (!groups.has(key)) groups.set(key, { inputPos: 0, inputNeg: 0, expectedPos: 0, expectedNeg: 0 });
+        if (signOf(value.n) < 0) groups.get(key).expectedNeg += 1;
+        else groups.get(key).expectedPos += 1;
+      });
+
+      for (const value of valuesA) {
+        const key = absFmt(value);
+        if (!groups.has(key)) return false;
+        if (signOf(value.n) < 0) groups.get(key).inputNeg += 1;
+        else groups.get(key).inputPos += 1;
+      }
+
+      let hasRealSignDifference = false;
+      for (const group of groups.values()) {
+        const inputTotal = group.inputPos + group.inputNeg;
+        const expectedTotal = group.expectedPos + group.expectedNeg;
+        if (inputTotal !== expectedTotal) return false;
+        if (group.inputPos !== group.expectedPos || group.inputNeg !== group.expectedNeg) {
+          hasRealSignDifference = true;
+        }
+      }
+      return hasRealSignDifference;
+    }
+
     function renderLegend() {
       if (!task) return;
       pairLegendEl.innerHTML = "";
@@ -513,7 +548,7 @@
       const midOk = sameMultiset(pairInputs, expectedValues);
       const cleverPairs = pairs.filter((pair) => pairHasCrossCancellation(pair.raw[0], pair.raw[1])).length;
       const bestCleverPairs = task.maxCleverPairs || task.pairCount;
-      const signOnlyMismatch = !midOk && sameMultiset(pairInputs, expectedValues, absFmt);
+      const signOnlyMismatch = !midOk && isSignOnlyMismatch(pairInputs, expectedValues);
 
       if (finalOk && midOk) {
         score += 1;
