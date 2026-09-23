@@ -289,6 +289,18 @@
       return { mixed, product, intendedPairs, pairCount: 2 };
     }
 
+    function buildPairFactors(bridge, pairIdx) {
+      const leftBase = randomFrom(factorPool, (value) => value % bridge !== 0);
+      const leftDen = randomFrom(factorPool, (value) => gcd(value, leftBase * bridge) === 1);
+      const rightBase = randomFrom(factorPool, (value) => value % bridge !== 0);
+      const rightDenBase = randomFrom(factorPool, (value) => gcd(value, rightBase * bridge) === 1);
+      if (!leftBase || !leftDen || !rightBase || !rightDenBase) return null;
+      return [
+        { n: leftBase * bridge, d: leftDen, id: pairIdx * 2 },
+        { n: rightBase, d: bridge * rightDenBase, id: pairIdx * 2 + 1 },
+      ];
+    }
+
     function generateTask() {
       for (let attempt = 0; attempt < 400; attempt++) {
         const pairCount = pick([2, 2, 3, 3, 4]);
@@ -297,18 +309,12 @@
         let valid = true;
 
         for (let pairIdx = 0; pairIdx < pairCount; pairIdx++) {
-          const bridge = bridges[pairIdx];
-          const leftBase = randomFrom(factorPool, (value) => value % bridge !== 0);
-          const leftDen = randomFrom(factorPool, (value) => gcd(value, leftBase * bridge) === 1);
-          const rightBase = randomFrom(factorPool, (value) => value % bridge !== 0);
-          const rightDenBase = randomFrom(factorPool, (value) => gcd(value, rightBase * bridge) === 1);
-          if (!leftBase || !leftDen || !rightBase || !rightDenBase) {
+          const pairFactors = buildPairFactors(bridges[pairIdx], pairIdx);
+          if (!pairFactors) {
             valid = false;
             break;
           }
-
-          factors.push({ n: leftBase * bridge, d: leftDen, id: pairIdx * 2 });
-          factors.push({ n: rightBase, d: bridge * rightDenBase, id: pairIdx * 2 + 1 });
+          factors.push(...pairFactors);
         }
 
         if (!valid) continue;
@@ -389,11 +395,8 @@
       return pairs.map((pair) => ({ raw: pair, value: mul(pair[0], pair[1]) }));
     }
 
-    function pairSimplifies(a, b) {
-      const rawNumerator = a.n * b.n;
-      const rawDenominator = a.d * b.d;
-      const reduced = frac(rawNumerator, rawDenominator);
-      return Math.abs(reduced.n) < Math.abs(rawNumerator) || reduced.d < Math.abs(rawDenominator);
+    function pairHasCrossCancellation(a, b) {
+      return gcd(Math.abs(a.n), Math.abs(b.d)) > 1 || gcd(Math.abs(b.n), Math.abs(a.d)) > 1;
     }
 
     function asCountMap(values, mapper) {
@@ -475,7 +478,7 @@
       const expectedValues = pairs.map((pair) => pair.value);
       const finalOk = eq(vr, task.product);
       const midOk = sameMultiset(pairInputs, expectedValues);
-      const cleverPairs = pairs.filter((pair) => pairSimplifies(pair.raw[0], pair.raw[1])).length;
+      const cleverPairs = pairs.filter((pair) => pairHasCrossCancellation(pair.raw[0], pair.raw[1])).length;
       const signOnlyMismatch = !midOk && sameMultiset(pairInputs, expectedValues, absFmt);
 
       if (finalOk && midOk) {
