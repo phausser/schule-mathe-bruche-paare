@@ -12,6 +12,7 @@ function makeEl(id = "") {
   const element = {
     id,
     value: "",
+    _innerHTML: "",
     textContent: "",
     className: "",
     dataset: {},
@@ -24,8 +25,8 @@ function makeEl(id = "") {
     querySelectorAll() { return []; },
   };
   Object.defineProperty(element, "innerHTML", {
-    get() { return ""; },
-    set() { this.children = []; },
+    get() { return this._innerHTML; },
+    set(value) { this._innerHTML = value; this.children = []; },
   });
   return element;
 }
@@ -79,6 +80,7 @@ vm.runInContext(script, context);
 
 let sawZeroNeg = false;
 let sawNegative = false;
+let sawThreePairs = false;
 let sawFourPairs = false;
 
 for (let i = 0; i < 300; i += 1) {
@@ -86,6 +88,7 @@ for (let i = 0; i < 300; i += 1) {
   const negatives = task.mixed.filter((factor) => factor.n < 0).length;
   if (negatives === 0) sawZeroNeg = true;
   if (negatives > 0) sawNegative = true;
+  if (task.pairCount === 3) sawThreePairs = true;
   if (task.pairCount === 4) sawFourPairs = true;
 
   assert.ok(task.pairCount >= 2 && task.pairCount <= 4, "pair count must stay between 2 and 4");
@@ -114,10 +117,25 @@ for (let i = 0; i < 300; i += 1) {
   document.getElementById("in-res").value = vm.runInContext("fmt(task.product)", context);
   vm.runInContext("check()", context);
   assert.strictEqual(vm.runInContext("score", context), 1, "correct answers must be accepted");
+
+  vm.runInContext("score = 0;", context);
+  for (let pairNo = 1; pairNo <= task.pairCount; pairNo += 1) {
+    const value = shuffledValues[pairNo - 1].value;
+    const signedValue = pairNo === 1 ? { n: -value.n, d: value.d } : value;
+    document.getElementById(`in-p${pairNo}`).value = vm.runInContext(
+      `fmt(${JSON.stringify(signedValue)})`,
+      context
+    );
+  }
+  document.getElementById("in-res").value = vm.runInContext("fmt(task.product)", context);
+  vm.runInContext("check()", context);
+  assert.strictEqual(vm.runInContext("score", context), 0, "wrong pair signs must be rejected");
+  assert.match(document.getElementById("feedback").innerHTML, /Vorzeichenfehler/, "feedback should mention sign errors");
 }
 
 assert.ok(sawZeroNeg, "generator should still produce tasks without negative signs");
 assert.ok(sawNegative, "generator should still produce tasks with negative signs");
+assert.ok(sawThreePairs, "generator should produce three-pair tasks");
 assert.ok(sawFourPairs, "generator should produce four-pair tasks");
 
 console.log("generate-task.test.js passed");
