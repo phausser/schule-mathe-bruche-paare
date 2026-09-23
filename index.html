@@ -296,7 +296,7 @@
       }
 
       const signs = Array(factors.length).fill(1);
-      const negChoices = [1, 1, 2, 2, Math.min(3, factors.length), Math.min(4, factors.length)];
+      const negChoices = [0, 1, 1, 2, 2, Math.min(3, factors.length), Math.min(4, factors.length)];
       const negCount = Math.min(pick(negChoices), factors.length);
       const negIndexes = shuffle(factors.map((_, index) => index)).slice(0, negCount);
       negIndexes.forEach((index) => { signs[index] = -1; });
@@ -461,6 +461,7 @@
         $("score").textContent = score;
         let extra = "Alle Zwischenergebnisse stimmen.";
         if (cleverPairs === task.pairCount) extra += " Sehr clevere Paarung — in jedem Paar ließ sich kürzen.";
+        else if (cleverPairs === 0) extra += " Die Paarung stimmt, aber zum Kürzen wäre eine andere Gruppierung geschickter gewesen.";
         else extra += " " + cleverPairs + " von " + task.pairCount + " Paaren waren besonders günstig zum Kürzen.";
         extra += " Vorzeichen und Gesamtprodukt passen auch.";
         showFeedback(true, "<strong>Richtig, " + fmt(task.product) + ".</strong> " + extra);
