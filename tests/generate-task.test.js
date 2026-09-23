@@ -131,6 +131,34 @@ for (let i = 0; i < 300; i += 1) {
   vm.runInContext("check()", context);
   assert.strictEqual(vm.runInContext("score", context), 0, "wrong pair signs must be rejected");
   assert.match(document.getElementById("feedback").innerHTML, /Vorzeichenfehler/, "feedback should mention sign errors");
+
+  vm.runInContext("score = 0;", context);
+  for (let pairNo = 1; pairNo <= task.pairCount; pairNo += 1) {
+    document.getElementById(`in-p${pairNo}`).value = vm.runInContext(
+      `fmt(${JSON.stringify(shuffledValues[pairNo - 1].value)})`,
+      context
+    );
+  }
+  const wrongTotal = { n: task.product.n + task.product.d, d: task.product.d };
+  document.getElementById("in-res").value = vm.runInContext(`fmt(${JSON.stringify(wrongTotal)})`, context);
+  vm.runInContext("check()", context);
+  assert.strictEqual(vm.runInContext("score", context), 0, "wrong total must be rejected");
+  assert.match(document.getElementById("feedback").innerHTML, /Richtiges Gesamtergebnis/, "feedback should reveal the total only when pair values are correct");
+
+  vm.runInContext("score = 0;", context);
+  for (let pairNo = 1; pairNo <= task.pairCount; pairNo += 1) {
+    const value = shuffledValues[pairNo - 1].value;
+    const changedValue = pairNo === 1 ? { n: value.n + value.d, d: value.d } : value;
+    document.getElementById(`in-p${pairNo}`).value = vm.runInContext(
+      `fmt(${JSON.stringify(changedValue)})`,
+      context
+    );
+  }
+  document.getElementById("in-res").value = vm.runInContext("fmt(task.product)", context);
+  vm.runInContext("check()", context);
+  assert.strictEqual(vm.runInContext("score", context), 0, "wrong pair values must be rejected");
+  assert.doesNotMatch(document.getElementById("feedback").innerHTML, /Richtiges Gesamtergebnis/, "feedback should not reveal the total for wrong intermediate values");
+  assert.match(document.getElementById("feedback").innerHTML, /Zwischenergebnisse/, "feedback should point back to the intermediate values");
 }
 
 assert.ok(sawZeroNeg, "generator should still produce tasks without negative signs");

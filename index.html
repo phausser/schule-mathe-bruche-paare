@@ -582,14 +582,23 @@
         if (!midOk && signOnlyMismatch) extra = " Unter den Zwischenergebnissen steckt mindestens ein Vorzeichenfehler.";
         else if (!midOk) extra = " Prüfe die Zwischenergebnisse noch einmal.";
         else extra = " Die Paare stimmen schon, aber das Gesamtprodukt noch nicht.";
-        showFeedback(
-          false,
-          "<strong>Noch nicht.</strong> Richtiges Gesamtergebnis: <strong>" +
-            escapeHtml(fmt(task.product)) +
-            "</strong>. Für deine gewählte Paarung ergeben sich diese Zwischenwerte: " +
-            details +
-            "." + extra
-        );
+        if (!midOk) {
+          showFeedback(
+            false,
+            "<strong>Noch nicht.</strong> Für deine gewählte Paarung ergeben sich diese Zwischenwerte: " +
+              details +
+              "." + extra
+          );
+        } else {
+          showFeedback(
+            false,
+            "<strong>Noch nicht.</strong> Richtiges Gesamtergebnis: <strong>" +
+              escapeHtml(fmt(task.product)) +
+              "</strong>. Für deine gewählte Paarung ergeben sich diese Zwischenwerte: " +
+              details +
+              "." + extra
+          );
+        }
         setTimeout(nextTask, 2200);
       }
     }
