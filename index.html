@@ -196,7 +196,7 @@
     </section>
   </div>
 
-  <script>
+  <script id="trainer-script">
     const $ = (id) => document.getElementById(id);
     const startEl = $("start");
     const playEl = $("play");
@@ -574,7 +574,7 @@
           false,
           "<strong>Noch nicht.</strong> Richtiges Gesamtergebnis: <strong>" +
             escapeHtml(fmt(task.product)) +
-            "</strong>. Richtige Zwischenwerte: " +
+            "</strong>. Für deine gewählte Paarung ergeben sich diese Zwischenwerte: " +
             details +
             "." + extra
         );

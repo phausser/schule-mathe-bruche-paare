@@ -4,7 +4,9 @@ const path = require("path");
 const vm = require("vm");
 
 const html = fs.readFileSync(path.join(__dirname, "..", "index.html"), "utf8");
-const script = html.match(/<script>([\s\S]*)<\/script>/)[1];
+const scriptMatch = html.match(/<script id="trainer-script">([\s\S]*?)<\/script>/i);
+assert.ok(scriptMatch, "trainer script block must exist");
+const script = scriptMatch[1];
 
 function makeEl(id = "") {
   return {
