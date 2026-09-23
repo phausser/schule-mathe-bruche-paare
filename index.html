@@ -294,7 +294,7 @@
       const factors = intendedPairs.flat();
       const mixed = shuffle(factors);
       const product = mixed.reduce((acc, factor) => mul(acc, factor), frac(1, 1));
-      return { mixed, product, intendedPairs, pairCount: 2 };
+      return { mixed, product, intendedPairs, pairCount: 2, maxCleverPairs: 2 };
     }
 
     function buildPairFactors(bridge, pairIdx) {
@@ -307,6 +307,33 @@
         { n: leftBase * bridge, d: leftDen, id: pairIdx * 2 },
         { n: rightBase, d: bridge * rightDenBase, id: pairIdx * 2 + 1 },
       ];
+    }
+
+    function pairHasCrossCancellation(a, b) {
+      return gcd(Math.abs(a.n), Math.abs(b.d)) > 1 || gcd(Math.abs(b.n), Math.abs(a.d)) > 1;
+    }
+
+    function maxCancellablePairs(factors) {
+      const memo = new Map();
+
+      function solve(remaining) {
+        if (remaining.length === 0) return 0;
+        const key = remaining.map((factor) => factor.id).sort((a, b) => a - b).join(",");
+        if (memo.has(key)) return memo.get(key);
+
+        const [first, ...rest] = remaining;
+        let best = 0;
+        for (let i = 0; i < rest.length; i++) {
+          const second = rest[i];
+          const next = rest.filter((_, index) => index !== i);
+          const score = (pairHasCrossCancellation(first, second) ? 1 : 0) + solve(next);
+          if (score > best) best = score;
+        }
+        memo.set(key, best);
+        return best;
+      }
+
+      return solve(factors);
     }
 
     function generateTask() {
@@ -339,12 +366,14 @@
         const mixed = shuffle(signedFactors);
         const product = mixed.reduce((acc, f) => mul(acc, f), frac(1, 1));
         if (Math.abs(product.n) > 240 || product.d > 48) continue;
+        const maxCleverPairs = maxCancellablePairs(signedFactors);
+        if (maxCleverPairs === 0) continue;
 
         const intendedPairs = [];
         for (let pairIdx = 0; pairIdx < pairCount; pairIdx++) {
           intendedPairs.push([signedFactors[pairIdx * 2], signedFactors[pairIdx * 2 + 1]]);
         }
-        return { mixed, product, intendedPairs, pairCount };
+        return { mixed, product, intendedPairs, pairCount, maxCleverPairs };
       }
       return fallbackTask();
     }
@@ -401,10 +430,6 @@
         task.mixed.filter((_, factorIndex) => pairAssignments[factorIndex] === index + 1)
       );
       return pairs.map((pair) => ({ raw: pair, value: mul(pair[0], pair[1]) }));
-    }
-
-    function pairHasCrossCancellation(a, b) {
-      return gcd(Math.abs(a.n), Math.abs(b.d)) > 1 || gcd(Math.abs(b.n), Math.abs(a.d)) > 1;
     }
 
     function asCountMap(values, mapper) {
@@ -487,15 +512,16 @@
       const finalOk = eq(vr, task.product);
       const midOk = sameMultiset(pairInputs, expectedValues);
       const cleverPairs = pairs.filter((pair) => pairHasCrossCancellation(pair.raw[0], pair.raw[1])).length;
+      const bestCleverPairs = task.maxCleverPairs || task.pairCount;
       const signOnlyMismatch = !midOk && sameMultiset(pairInputs, expectedValues, absFmt);
 
       if (finalOk && midOk) {
         score += 1;
         $("score").textContent = score;
         let extra = "Alle Zwischenergebnisse stimmen.";
-        if (cleverPairs === task.pairCount) extra += " Sehr clevere Paarung — in jedem Paar ließ sich kürzen.";
+        if (cleverPairs === bestCleverPairs) extra += " Sehr clevere Paarung — besser ließ sich diese Aufgabe nicht ordnen.";
         else if (cleverPairs === 0) extra += " Die Paarung stimmt, aber zum Kürzen wäre eine andere Gruppierung geschickter gewesen.";
-        else extra += " " + cleverPairs + " von " + task.pairCount + " Paaren waren besonders günstig zum Kürzen.";
+        else extra += " " + cleverPairs + " von maximal " + bestCleverPairs + " Paaren waren besonders günstig zum Kürzen.";
         extra += " Vorzeichen und Gesamtprodukt passen auch.";
         showFeedback(true, "<strong>Richtig, " + escapeHtml(fmt(task.product)) + ".</strong> " + extra);
         if (score >= 10) {
