@@ -278,41 +278,61 @@
       return task.pairCount;
     }
 
+    function fallbackTask() {
+      const intendedPairs = [
+        [{ ...frac(6, 5), id: 0 }, { ...frac(5, 4), id: 1 }],
+        [{ ...frac(-9, 8), id: 2 }, { ...frac(8, 3), id: 3 }],
+      ];
+      const factors = intendedPairs.flat();
+      const mixed = shuffle(factors);
+      const product = mixed.reduce((acc, factor) => mul(acc, factor), frac(1, 1));
+      return { mixed, product, intendedPairs, pairCount: 2 };
+    }
+
     function generateTask() {
-      const pairCount = pick([2, 2, 3, 3, 4]);
-      const bridges = shuffle(bridgePool).slice(0, pairCount);
-      const factors = [];
+      for (let attempt = 0; attempt < 400; attempt++) {
+        const pairCount = pick([2, 2, 3, 3, 4]);
+        const bridges = shuffle(bridgePool).slice(0, pairCount);
+        const factors = [];
+        let valid = true;
 
-      for (let pairIdx = 0; pairIdx < pairCount; pairIdx++) {
-        const bridge = bridges[pairIdx];
-        const leftBase = randomFrom(factorPool, (value) => value % bridge !== 0);
-        const leftDen = randomFrom(factorPool, (value) => gcd(value, leftBase * bridge) === 1);
-        const rightBase = randomFrom(factorPool, (value) => value % bridge !== 0);
-        const rightDenBase = randomFrom(factorPool, (value) => gcd(value, rightBase * bridge) === 1);
-        if (!leftBase || !leftDen || !rightBase || !rightDenBase) return generateTask();
+        for (let pairIdx = 0; pairIdx < pairCount; pairIdx++) {
+          const bridge = bridges[pairIdx];
+          const leftBase = randomFrom(factorPool, (value) => value % bridge !== 0);
+          const leftDen = randomFrom(factorPool, (value) => gcd(value, leftBase * bridge) === 1);
+          const rightBase = randomFrom(factorPool, (value) => value % bridge !== 0);
+          const rightDenBase = randomFrom(factorPool, (value) => gcd(value, rightBase * bridge) === 1);
+          if (!leftBase || !leftDen || !rightBase || !rightDenBase) {
+            valid = false;
+            break;
+          }
 
-        factors.push({ n: leftBase * bridge, d: leftDen, id: pairIdx * 2 });
-        factors.push({ n: rightBase, d: bridge * rightDenBase, id: pairIdx * 2 + 1 });
+          factors.push({ n: leftBase * bridge, d: leftDen, id: pairIdx * 2 });
+          factors.push({ n: rightBase, d: bridge * rightDenBase, id: pairIdx * 2 + 1 });
+        }
+
+        if (!valid) continue;
+
+        const signs = Array(factors.length).fill(1);
+        const negChoices = [0, 1, 1, 2, 2, Math.min(3, factors.length), Math.min(4, factors.length)];
+        const negCount = Math.min(pick(negChoices), factors.length);
+        const negIndexes = shuffle(factors.map((_, index) => index)).slice(0, negCount);
+        negIndexes.forEach((index) => { signs[index] = -1; });
+
+        const signedFactors = factors.map((factor, index) => ({ ...frac(signs[index] * factor.n, factor.d), id: factor.id }));
+        if (signedFactors.some((factor) => factor.d === 1)) continue;
+
+        const mixed = shuffle(signedFactors);
+        const product = mixed.reduce((acc, f) => mul(acc, f), frac(1, 1));
+        if (Math.abs(product.n) > 240 || product.d > 48) continue;
+
+        const intendedPairs = [];
+        for (let pairIdx = 0; pairIdx < pairCount; pairIdx++) {
+          intendedPairs.push([signedFactors[pairIdx * 2], signedFactors[pairIdx * 2 + 1]]);
+        }
+        return { mixed, product, intendedPairs, pairCount };
       }
-
-      const signs = Array(factors.length).fill(1);
-      const negChoices = [0, 1, 1, 2, 2, Math.min(3, factors.length), Math.min(4, factors.length)];
-      const negCount = Math.min(pick(negChoices), factors.length);
-      const negIndexes = shuffle(factors.map((_, index) => index)).slice(0, negCount);
-      negIndexes.forEach((index) => { signs[index] = -1; });
-
-      const signedFactors = factors.map((factor, index) => ({ ...frac(signs[index] * factor.n, factor.d), id: factor.id }));
-      if (signedFactors.some((factor) => factor.d === 1)) return generateTask();
-
-      const mixed = shuffle(signedFactors);
-      const product = mixed.reduce((acc, f) => mul(acc, f), frac(1, 1));
-      if (Math.abs(product.n) > 240 || product.d > 48) return generateTask();
-
-      const intendedPairs = [];
-      for (let pairIdx = 0; pairIdx < pairCount; pairIdx++) {
-        intendedPairs.push([signedFactors[pairIdx * 2], signedFactors[pairIdx * 2 + 1]]);
-      }
-      return { mixed, product, intendedPairs, pairCount };
+      return fallbackTask();
     }
 
     function renderFactors() {
@@ -369,8 +389,11 @@
       return pairs.map((pair) => ({ raw: pair, value: mul(pair[0], pair[1]) }));
     }
 
-    function pairCancels(a, b) {
-      return gcd(Math.abs(a.n), Math.abs(b.d)) > 1 || gcd(Math.abs(b.n), Math.abs(a.d)) > 1;
+    function pairSimplifies(a, b) {
+      const rawNumerator = a.n * b.n;
+      const rawDenominator = a.d * b.d;
+      const reduced = frac(rawNumerator, rawDenominator);
+      return Math.abs(reduced.n) < Math.abs(rawNumerator) || reduced.d < Math.abs(rawDenominator);
     }
 
     function asCountMap(values, mapper) {
@@ -452,7 +475,7 @@
       const expectedValues = pairs.map((pair) => pair.value);
       const finalOk = eq(vr, task.product);
       const midOk = sameMultiset(pairInputs, expectedValues);
-      const cleverPairs = pairs.filter((pair) => pairCancels(pair.raw[0], pair.raw[1])).length;
+      const cleverPairs = pairs.filter((pair) => pairSimplifies(pair.raw[0], pair.raw[1])).length;
       const signOnlyMismatch = !midOk && sameMultiset(pairInputs, expectedValues, absFmt);
 
       if (finalOk && midOk) {
