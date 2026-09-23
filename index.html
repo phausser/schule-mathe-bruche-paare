@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Kürzungs-Trainer · Klasse 7</title>
+  <style>
+    :root {
+      --bg: #f3efe6;
+      --ink: #1c2430;
+      --muted: #5c6774;
+      --card: #fffdf8;
+      --line: #d8d0c0;
+      --accent: #2f6f5e;
+      --accent-2: #c45c26;
+      --good: #2a7d4f;
+      --bad: #b42318;
+      --pair1: #2f6f5e;
+      --pair2: #3d5a80;
+      --shadow: 0 10px 30px rgba(28, 36, 48, .08);
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; }
+    body {
+      font-family: "Avenir Next", "Segoe UI", system-ui, sans-serif;
+      background:
+        radial-gradient(900px 400px at 10% -10%, #ffe7c8 0%, transparent 50%),
+        radial-gradient(800px 400px at 110% 0%, #d8efe6 0%, transparent 46%),
+        var(--bg);
+      color: var(--ink);
+    }
+    .wrap { max-width: 920px; margin: 0 auto; padding: 24px 18px 48px; }
+    header {
+      display: flex; justify-content: space-between; align-items: flex-end;
+      gap: 16px; margin-bottom: 22px;
+    }
+    h1 { font-size: 1.35rem; margin: 0; letter-spacing: -.02em; }
+    .sub { color: var(--muted); font-size: .95rem; margin-top: 4px; }
+    .stats {
+      display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end;
+    }
+    .pill {
+      background: var(--card); border: 1px solid var(--line);
+      border-radius: 999px; padding: 8px 14px; font-variant-numeric: tabular-nums;
+      box-shadow: var(--shadow); font-weight: 600;
+    }
+    .screen { background: var(--card); border: 1px solid var(--line); border-radius: 22px; padding: 28px; box-shadow: var(--shadow); }
+    .hidden { display: none !important; }
+    p { line-height: 1.5; }
+    .hint-box {
+      background: #f6f1e6; border-left: 4px solid var(--accent-2);
+      padding: 12px 14px; border-radius: 10px; color: #4a4034;
+    }
+    button {
+      font: inherit; cursor: pointer; border: 0; border-radius: 12px;
+      padding: 12px 18px; background: var(--accent); color: #fff; font-weight: 700;
+    }
+    button.secondary { background: #ece6da; color: var(--ink); }
+    button:disabled { opacity: .45; cursor: not-allowed; }
+    .row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+    .factors {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 18px 0 8px;
+    }
+    @media (max-width: 720px) { .factors { grid-template-columns: repeat(2, 1fr); } }
+    .factor {
+      background: #ffffff;
+      border: 3px solid #2a3340;
+      border-radius: 18px;
+      min-height: 148px;
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; cursor: pointer; user-select: none; transition: .15s ease;
+      position: relative;
+      color: #111827;
+      font-weight: 800;
+      padding: 12px 8px 28px;
+    }
+    .factor:hover { transform: translateY(-2px); }
+    .factor.p1 {
+      border-color: #0f3d32;
+      background: #b7ebc8;
+      color: #06281f;
+    }
+    .factor.p2 {
+      border-color: #1b3358;
+      background: #b9d4f6;
+      color: #0b1f3a;
+    }
+    .times {
+      position: absolute; right: -10px; top: 50%; transform: translateY(-50%);
+      font-weight: 800; color: var(--muted); pointer-events: none;
+    }
+    .factor:last-child .times { display: none; }
+    .frac { text-align: center; font-variant-numeric: tabular-nums; color: inherit; }
+    .num, .den {
+      font-size: 1.7rem; font-weight: 800; padding: 2px 10px;
+      color: inherit;
+    }
+    .bar { height: 4px; background: currentColor; width: 48px; margin: 3px auto; border-radius: 2px; }
+    .sign {
+      position: absolute; top: 8px; left: 10px; font-weight: 800;
+      color: #9a3412; font-size: 1.25rem;
+    }
+    .tag {
+      position: absolute; bottom: 8px; font-size: .78rem; font-weight: 800; letter-spacing: .04em;
+      text-transform: uppercase; color: #1f2937;
+    }
+    .factor.p1 .tag { color: #064e3b; }
+    .factor.p2 .tag { color: #1e3a8a; }
+    .pair-legend { display: flex; gap: 16px; color: var(--muted); font-size: .9rem; margin-bottom: 8px; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+    .inputs {
+      display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-top: 8px;
+    }
+    @media (max-width: 720px) { .inputs { grid-template-columns: 1fr; } }
+    label { display: block; font-size: .82rem; font-weight: 700; margin-bottom: 6px; color: var(--muted); }
+    input[type="text"] {
+      width: 100%; font: inherit; font-size: 1.15rem; padding: 12px 12px;
+      border: 2px solid var(--line); border-radius: 12px; background: #fff;
+    }
+    input:focus { outline: 3px solid rgba(47,111,94,.25); border-color: var(--accent); }
+    .feedback { margin-top: 16px; padding: 14px 16px; border-radius: 14px; display: none; }
+    .feedback.show { display: block; }
+    .feedback.ok { background: #e5f6ec; color: #14532d; }
+    .feedback.no { background: #fde8e6; color: #7f1d1d; }
+    .win h2 { margin-top: 0; font-size: 2rem; }
+    .time-big { font-size: 2.4rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+    .eq { text-align: center; color: var(--muted); margin: 6px 0 0; font-size: .95rem; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div>
+        <h1>Kürzungs-Trainer</h1>
+        <div class="sub">Vier Faktoren · clever paaren · Vorzeichen setzen</div>
+      </div>
+      <div class="stats">
+        <div class="pill">Richtig: <span id="score">0</span> / 10</div>
+        <div class="pill">Zeit: <span id="clock">00:00</span></div>
+      </div>
+    </header>
+
+    <section id="start" class="screen">
+      <p>Du bekommst immer ein Produkt aus <strong>vier Brüchen</strong>. Deine Aufgabe:</p>
+      <ol>
+        <li>Zwei Paare bilden — am besten so, dass etwas <strong>weggekürzt</strong> werden kann.</li>
+        <li>Jedes Paar ausrechnen (Vorzeichen nicht vergessen).</li>
+        <li>Die beiden Zwischenergebnisse multiplizieren.</li>
+      </ol>
+      <div class="hint-box">
+        Tipp wie im Unterricht: \(A\cdot B\cdot C\cdot D=(A\cdot C)\cdot(B\cdot D)\).<br>
+        Zwei Minuszeichen ergeben Plus. Kürze, bevor du große Zahlen multiplizierst.
+      </div>
+      <div class="row">
+        <button id="btn-start">Los geht’s</button>
+      </div>
+    </section>
+
+    <section id="play" class="screen hidden">
+      <div class="pair-legend">
+        <span><span class="dot" style="background:var(--pair1)"></span>Paar 1</span>
+        <span><span class="dot" style="background:var(--pair2)"></span>Paar 2</span>
+        <span>Klicke zwei Karten für Paar 1. Der Rest wird Paar 2.</span>
+      </div>
+      <div class="factors" id="factors"></div>
+      <p class="eq" id="pairing-label">Noch kein Paar gewählt.</p>
+      <div class="inputs">
+        <div>
+          <label for="in-p1">Zwischenergebnis Paar 1</label>
+          <input id="in-p1" type="text" inputmode="text" placeholder="z. B. 5 oder -3/2" />
+        </div>
+        <div>
+          <label for="in-p2">Zwischenergebnis Paar 2</label>
+          <input id="in-p2" type="text" inputmode="text" placeholder="z. B. 30" />
+        </div>
+        <div>
+          <label for="in-res">Gesamtergebnis</label>
+          <input id="in-res" type="text" inputmode="text" placeholder="z. B. 150" />
+        </div>
+      </div>
+      <div class="row">
+        <button id="btn-check">Prüfen</button>
+        <button id="btn-reset-pair" class="secondary">Paare zurücksetzen</button>
+        <button id="btn-tip" class="secondary">Tipp</button>
+      </div>
+      <div id="feedback" class="feedback"></div>
+    </section>
+
+    <section id="win" class="screen hidden win">
+      <h2>Gewonnen!</h2>
+      <p>Du hast 10 Aufgaben richtig zusammengestellt.</p>
+      <p>Benötigte Zeit:</p>
+      <div class="time-big" id="final-time">00:00</div>
+      <div class="row">
+        <button id="btn-again">Nochmal spielen</button>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const startEl = $("start");
+    const playEl = $("play");
+    const winEl = $("win");
+    const factorsEl = $("factors");
+    const feedbackEl = $("feedback");
+    const pairingLabel = $("pairing-label");
+
+    let score = 0;
+    let startedAt = 0;
+    let timerId = null;
+    let task = null;
+    let selected = [];
+
+    function gcd(a, b) {
+      a = Math.abs(a); b = Math.abs(b);
+      while (b) { const t = a % b; a = b; b = t; }
+      return a || 1;
+    }
+    function frac(n, d) {
+      if (d < 0) { n = -n; d = -d; }
+      const g = gcd(n, d);
+      return { n: n / g, d: d / g };
+    }
+    function mul(a, b) { return frac(a.n * b.n, a.d * b.d); }
+    function eq(a, b) { return a.n === b.n && a.d === b.d; }
+    function fmt(f) {
+      if (f.d === 1) return String(f.n);
+      return f.n + "/" + f.d;
+    }
+    function parseInput(s) {
+      const t = String(s || "").trim().replace(/\s+/g, "").replace("−", "-");
+      if (!t) return null;
+      const m = t.match(/^(-?\d+)(?:\/(-?\d+))?$/);
+      if (!m) return null;
+      const n = Number(m[1]);
+      const d = m[2] == null ? 1 : Number(m[2]);
+      if (!d) return null;
+      return frac(n, d);
+    }
+    function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+    function shuffle(arr) {
+      const a = arr.slice();
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    function generateTask() {
+      const bridges = [3, 4, 5, 6, 7, 8];
+      const extras = [2, 3, 4, 5, 6, 8, 10, 12];
+      const b1 = pick(bridges);
+      let b2 = pick(bridges);
+      if (b2 === b1) b2 = pick(bridges);
+
+      let nA = pick(extras) * (Math.random() < 0.5 ? b1 : 1);
+      let dC = pick(extras);
+      // Ensure A and intended partner C cancel via b1
+      const A = frac(nA, b1);
+      const C = frac(b1, dC);
+
+      let nB = pick(extras) * (Math.random() < 0.45 ? b2 : pick([1, 2]));
+      let dD = pick(extras);
+      const B = frac(nB, b2);
+      const D = frac(b2, dD);
+
+      const signs = shuffle([1, 1, 1, 1]);
+      const negCount = pick([0, 1, 1, 2, 2]);
+      for (let i = 0; i < negCount; i++) signs[i] = -1;
+
+      const factors = [
+        { ...frac(signs[0] * A.n, A.d), id: 0 },
+        { ...frac(signs[1] * B.n, B.d), id: 1 },
+        { ...frac(signs[2] * C.n, C.d), id: 2 },
+        { ...frac(signs[3] * D.n, D.d), id: 3 },
+      ];
+      const mixed = shuffle(factors);
+      const product = mixed.reduce((acc, f) => mul(acc, f), frac(1, 1));
+      // Keep results in a friendly range; regenerate if wild
+      if (Math.abs(product.n) > 120 || product.d !== 1) return generateTask();
+
+      const intendedPairs = [
+        [factors[0], factors[2]],
+        [factors[1], factors[3]],
+      ];
+      return { mixed, product, intendedPairs };
+    }
+
+    function renderFactors() {
+      factorsEl.innerHTML = "";
+      task.mixed.forEach((f, i) => {
+        const el = document.createElement("button");
+        el.type = "button";
+        el.className = "factor";
+        el.dataset.index = i;
+        const pairIdx = pairOf(i);
+        if (pairIdx === 1) el.classList.add("p1");
+        if (pairIdx === 2) el.classList.add("p2");
+        el.innerHTML = `
+          ${f.n < 0 ? '<span class="sign">−</span>' : ""}
+          <div class="frac">
+            <div class="num">${Math.abs(f.n)}</div>
+            <div class="bar"></div>
+            <div class="den">${f.d}</div>
+          </div>
+          <div class="tag">${pairIdx ? "Paar " + pairIdx : "wählen"}</div>
+          <span class="times">·</span>
+        `;
+        el.addEventListener("click", () => onPick(i));
+        factorsEl.appendChild(el);
+      });
+      updatePairLabel();
+    }
+
+    function pairOf(index) {
+      if (selected.length < 2) return 0;
+      if (selected.includes(index)) return 1;
+      return 2;
+    }
+
+    function onPick(i) {
+      if (selected.length >= 2) return;
+      if (selected.includes(i)) return;
+      selected.push(i);
+      renderFactors();
+    }
+
+    function updatePairLabel() {
+      if (selected.length < 2) {
+        pairingLabel.textContent = "Noch kein Paar gewählt. Klicke zwei Karten.";
+        return;
+      }
+      pairingLabel.textContent = "Paar 1 und Paar 2 stehen. Rechne jedes Paar, dann das Produkt.";
+    }
+
+    function pairValues() {
+      if (selected.length < 2) return null;
+      const p1 = selected.map((i) => task.mixed[i]);
+      const p2 = task.mixed.filter((_, i) => !selected.includes(i));
+      return {
+        p1: mul(p1[0], p1[1]),
+        p2: mul(p2[0], p2[1]),
+        raw1: p1,
+        raw2: p2,
+      };
+    }
+
+    function pairCancels(a, b) {
+      return gcd(a.n, b.d) > 1 || gcd(b.n, a.d) > 1;
+    }
+
+    function showFeedback(ok, html) {
+      feedbackEl.className = "feedback show " + (ok ? "ok" : "no");
+      feedbackEl.innerHTML = html;
+    }
+
+    function check() {
+      if (!task) return;
+      if (selected.length < 2) {
+        showFeedback(false, "Bitte zuerst zwei Karten für Paar 1 wählen.");
+        return;
+      }
+      const v1 = parseInput($("in-p1").value);
+      const v2 = parseInput($("in-p2").value);
+      const vr = parseInput($("in-res").value);
+      if (!v1 || !v2 || !vr) {
+        showFeedback(false, "Bitte gültige Zahlen eingeben: ganze Zahl oder Bruch wie <code>-3/4</code>.");
+        return;
+      }
+      const pairs = pairValues();
+      const finalOk = eq(vr, task.product);
+      const midOk = (eq(v1, pairs.p1) && eq(v2, pairs.p2)) || (eq(v1, pairs.p2) && eq(v2, pairs.p1));
+      const clever = pairCancels(pairs.raw1[0], pairs.raw1[1]) && pairCancels(pairs.raw2[0], pairs.raw2[1]);
+      const signOk = Math.sign(v1.n) === Math.sign(pairs.p1.n || 1) || Math.sign(v1.n) === Math.sign(pairs.p2.n || 1);
+
+      if (finalOk) {
+        score += 1;
+        $("score").textContent = score;
+        let extra = midOk
+          ? "Zwischenergebnisse stimmen."
+          : "Das Endergebnis stimmt. Schau beim nächsten Mal noch genauer auf die Zwischenwerte.";
+        if (clever) extra += " Sehr clevere Paarung — da ließ sich gut kürzen.";
+        else extra += " Die Paarung funktioniert, kürzt aber wenig. Suche nächstes Mal gemeinsame Zahlen über Kreuz.";
+        extra += " Zwei Minus = Plus.";
+        showFeedback(true, "<strong>Richtig, " + fmt(task.product) + ".</strong> " + extra);
+        if (score >= 10) {
+          finish();
+          return;
+        }
+        setTimeout(nextTask, 900);
+      } else {
+        showFeedback(
+          false,
+          "<strong>Noch nicht.</strong> Richtiges Gesamtergebnis: <strong>" +
+            fmt(task.product) +
+            "</strong>. Bei deiner Paarung wären die Zwischenwerte " +
+            fmt(pairs.p1) + " und " + fmt(pairs.p2) +
+            ". Achte aufs Kürzen und aufs Vorzeichen."
+        );
+        setTimeout(nextTask, 2200);
+      }
+    }
+
+    function nextTask() {
+      task = generateTask();
+      selected = [];
+      $("in-p1").value = "";
+      $("in-p2").value = "";
+      $("in-res").value = "";
+      feedbackEl.className = "feedback";
+      renderFactors();
+    }
+
+    function tick() {
+      const s = Math.floor((Date.now() - startedAt) / 1000);
+      const mm = String(Math.floor(s / 60)).padStart(2, "0");
+      const ss = String(s % 60).padStart(2, "0");
+      $("clock").textContent = mm + ":" + ss;
+    }
+
+    function begin() {
+      score = 0;
+      $("score").textContent = "0";
+      startedAt = Date.now();
+      clearInterval(timerId);
+      timerId = setInterval(tick, 250);
+      tick();
+      startEl.classList.add("hidden");
+      winEl.classList.add("hidden");
+      playEl.classList.remove("hidden");
+      nextTask();
+    }
+
+    function finish() {
+      clearInterval(timerId);
+      playEl.classList.add("hidden");
+      winEl.classList.remove("hidden");
+      $("final-time").textContent = $("clock").textContent;
+    }
+
+    $("btn-start").addEventListener("click", begin);
+    $("btn-again").addEventListener("click", begin);
+    $("btn-check").addEventListener("click", check);
+    $("btn-reset-pair").addEventListener("click", () => {
+      selected = [];
+      renderFactors();
+    });
+    $("btn-tip").addEventListener("click", () => {
+      if (!task) return;
+      showFeedback(
+        true,
+        "Suche eine Zahl, die <em>oben in einem</em> und <em>unten in einem anderen</em> Bruch steht. Diese beiden gehören oft ins selbe Paar. Zähle die Minuszeichen: 0 oder 2 → Ergebnis positiv, 1 → negativ."
+      );
+    });
+    ["in-p1", "in-p2", "in-res"].forEach((id) => {
+      $(id).addEventListener("keydown", (e) => {
+        if (e.key === "Enter") check();
+      });
+    });
+  </script>
+</body>
+</html>
