@@ -234,6 +234,14 @@
       if (f.d === 1) return String(Math.abs(f.n));
       return Math.abs(f.n) + "/" + f.d;
     }
+    function escapeHtml(text) {
+      return String(text)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
     function parseInput(s) {
       const t = String(s || "").trim().replace(/\s+/g, "").replace("−", "-");
       if (!t) return null;
@@ -489,14 +497,14 @@
         else if (cleverPairs === 0) extra += " Die Paarung stimmt, aber zum Kürzen wäre eine andere Gruppierung geschickter gewesen.";
         else extra += " " + cleverPairs + " von " + task.pairCount + " Paaren waren besonders günstig zum Kürzen.";
         extra += " Vorzeichen und Gesamtprodukt passen auch.";
-        showFeedback(true, "<strong>Richtig, " + fmt(task.product) + ".</strong> " + extra);
+        showFeedback(true, "<strong>Richtig, " + escapeHtml(fmt(task.product)) + ".</strong> " + extra);
         if (score >= 10) {
           finish();
           return;
         }
         setTimeout(nextTask, 900);
       } else {
-        const details = pairs.map((pair, index) => "Paar " + (index + 1) + ": <strong>" + fmt(pair.value) + "</strong>").join(" · ");
+        const details = pairs.map((pair, index) => "Paar " + (index + 1) + ": <strong>" + escapeHtml(fmt(pair.value)) + "</strong>").join(" · ");
         let extra = "";
         if (!midOk && signOnlyMismatch) extra = " Unter den Zwischenergebnissen steckt mindestens ein Vorzeichenfehler.";
         else if (!midOk) extra = " Prüfe die Zwischenergebnisse noch einmal.";
@@ -504,7 +512,7 @@
         showFeedback(
           false,
           "<strong>Noch nicht.</strong> Richtiges Gesamtergebnis: <strong>" +
-            fmt(task.product) +
+            escapeHtml(fmt(task.product)) +
             "</strong>. Richtige Zwischenwerte: " +
             details +
             "." + extra
