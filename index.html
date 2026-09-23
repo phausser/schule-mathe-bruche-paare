@@ -59,9 +59,8 @@
     button:disabled { opacity: .45; cursor: not-allowed; }
     .row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
     .factors {
-      display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 18px 0 8px;
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin: 18px 0 8px;
     }
-    @media (max-width: 720px) { .factors { grid-template-columns: repeat(2, 1fr); } }
     .factor {
       background: #ffffff;
       border: 3px solid #2a3340;
@@ -75,15 +74,25 @@
       padding: 12px 8px 28px;
     }
     .factor:hover { transform: translateY(-2px); }
-    .factor.p1 {
+    .factor[data-pair="1"] {
       border-color: #0f3d32;
       background: #b7ebc8;
       color: #06281f;
     }
-    .factor.p2 {
+    .factor[data-pair="2"] {
       border-color: #1b3358;
       background: #b9d4f6;
       color: #0b1f3a;
+    }
+    .factor[data-pair="3"] {
+      border-color: #6b3fa0;
+      background: #e2ccff;
+      color: #3b0764;
+    }
+    .factor[data-pair="4"] {
+      border-color: #9a3412;
+      background: #ffd9c2;
+      color: #7c2d12;
     }
     .times {
       position: absolute; right: -10px; top: 50%; transform: translateY(-50%);
@@ -104,13 +113,20 @@
       position: absolute; bottom: 8px; font-size: .78rem; font-weight: 800; letter-spacing: .04em;
       text-transform: uppercase; color: #1f2937;
     }
-    .factor.p1 .tag { color: #064e3b; }
-    .factor.p2 .tag { color: #1e3a8a; }
+    .factor[data-pair="1"] .tag { color: #064e3b; }
+    .factor[data-pair="2"] .tag { color: #1e3a8a; }
+    .factor[data-pair="3"] .tag { color: #581c87; }
+    .factor[data-pair="4"] .tag { color: #7c2d12; }
     .pair-legend { display: flex; gap: 16px; color: var(--muted); font-size: .9rem; margin-bottom: 8px; }
     .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+    .dot.p1 { background: var(--pair1); }
+    .dot.p2 { background: var(--pair2); }
+    .dot.p3 { background: #8b5cf6; }
+    .dot.p4 { background: #f97316; }
     .inputs {
       display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-top: 8px;
     }
+    @media (max-width: 900px) { .inputs { grid-template-columns: 1fr 1fr; } }
     @media (max-width: 720px) { .inputs { grid-template-columns: 1fr; } }
     label { display: block; font-size: .82rem; font-weight: 700; margin-bottom: 6px; color: var(--muted); }
     input[type="text"] {
@@ -132,7 +148,7 @@
     <header>
       <div>
         <h1>Kürzungs-Trainer</h1>
-        <div class="sub">Vier Faktoren · clever paaren · Vorzeichen setzen</div>
+        <div class="sub">2 bis 4 Paare · clever paaren · Vorzeichen setzen</div>
       </div>
       <div class="stats">
         <div class="pill">Richtig: <span id="score">0</span> / 10</div>
@@ -141,15 +157,15 @@
     </header>
 
     <section id="start" class="screen">
-      <p>Du bekommst immer ein Produkt aus <strong>vier Brüchen</strong>. Deine Aufgabe:</p>
+      <p>Du bekommst immer ein Produkt aus <strong>2 bis 4 Paaren von Brüchen</strong>. Deine Aufgabe:</p>
       <ol>
-        <li>Zwei Paare bilden — am besten so, dass etwas <strong>weggekürzt</strong> werden kann.</li>
+        <li>Alle Paare bilden — am besten so, dass etwas <strong>weggekürzt</strong> werden kann.</li>
         <li>Jedes Paar ausrechnen (Vorzeichen nicht vergessen).</li>
-        <li>Die beiden Zwischenergebnisse multiplizieren.</li>
+        <li>Alle Zwischenergebnisse multiplizieren.</li>
       </ol>
       <div class="hint-box">
-        Tipp wie im Unterricht: \(A\cdot B\cdot C\cdot D=(A\cdot C)\cdot(B\cdot D)\).<br>
-        Zwei Minuszeichen ergeben Plus. Kürze, bevor du große Zahlen multiplizierst.
+        Tipp wie im Unterricht: erst passende Brüche zusammenfassen, dann kürzen.<br>
+        Achte bei jedem Paar auf gemeinsame Zahlen über Kreuz – und auf die Minuszeichen.
       </div>
       <div class="row">
         <button id="btn-start">Los geht’s</button>
@@ -157,27 +173,10 @@
     </section>
 
     <section id="play" class="screen hidden">
-      <div class="pair-legend">
-        <span><span class="dot" style="background:var(--pair1)"></span>Paar 1</span>
-        <span><span class="dot" style="background:var(--pair2)"></span>Paar 2</span>
-        <span>Klicke zwei Karten für Paar 1. Der Rest wird Paar 2.</span>
-      </div>
+      <div class="pair-legend" id="pair-legend"></div>
       <div class="factors" id="factors"></div>
       <p class="eq" id="pairing-label">Noch kein Paar gewählt.</p>
-      <div class="inputs">
-        <div>
-          <label for="in-p1">Zwischenergebnis Paar 1</label>
-          <input id="in-p1" type="text" inputmode="text" placeholder="z. B. 5 oder -3/2" />
-        </div>
-        <div>
-          <label for="in-p2">Zwischenergebnis Paar 2</label>
-          <input id="in-p2" type="text" inputmode="text" placeholder="z. B. 30" />
-        </div>
-        <div>
-          <label for="in-res">Gesamtergebnis</label>
-          <input id="in-res" type="text" inputmode="text" placeholder="z. B. 150" />
-        </div>
-      </div>
+      <div class="inputs" id="inputs"></div>
       <div class="row">
         <button id="btn-check">Prüfen</button>
         <button id="btn-reset-pair" class="secondary">Paare zurücksetzen</button>
@@ -205,12 +204,15 @@
     const factorsEl = $("factors");
     const feedbackEl = $("feedback");
     const pairingLabel = $("pairing-label");
+    const pairLegendEl = $("pair-legend");
+    const inputsEl = $("inputs");
 
     let score = 0;
     let startedAt = 0;
     let timerId = null;
     let task = null;
-    let selected = [];
+    let pairAssignments = [];
+    let activePair = 1;
 
     function gcd(a, b) {
       a = Math.abs(a); b = Math.abs(b);
@@ -248,44 +250,66 @@
       return a;
     }
 
+    const pairColors = [null, "p1", "p2", "p3", "p4"];
+    const factorPool = [2, 3, 4, 5, 6, 8, 9, 10, 12];
+    const bridgePool = [2, 3, 5, 7];
+
+    function randomFrom(pool, predicate = () => true) {
+      const options = pool.filter(predicate);
+      return options.length ? pick(options) : null;
+    }
+
+    function pairCountOf(pairNo) {
+      return pairAssignments.filter((p) => p === pairNo).length;
+    }
+
+    function allPairsDone() {
+      return pairAssignments.length > 0 && pairAssignments.every(Boolean);
+    }
+
+    function currentPair() {
+      for (let pairNo = 1; pairNo <= task.pairCount; pairNo++) {
+        if (pairCountOf(pairNo) < 2) return pairNo;
+      }
+      return task.pairCount;
+    }
+
     function generateTask() {
-      const bridges = [3, 4, 5, 6, 7, 8];
-      const extras = [2, 3, 4, 5, 6, 8, 10, 12];
-      const b1 = pick(bridges);
-      let b2 = pick(bridges);
-      if (b2 === b1) b2 = pick(bridges);
+      const pairCount = pick([2, 2, 3, 3, 4]);
+      const bridges = shuffle(bridgePool).slice(0, pairCount);
+      const factors = [];
 
-      let nA = pick(extras) * (Math.random() < 0.5 ? b1 : 1);
-      let dC = pick(extras);
-      // Ensure A and intended partner C cancel via b1
-      const A = frac(nA, b1);
-      const C = frac(b1, dC);
+      for (let pairIdx = 0; pairIdx < pairCount; pairIdx++) {
+        const bridge = bridges[pairIdx];
+        const leftBase = randomFrom(factorPool, (value) => value % bridge !== 0);
+        const leftDen = randomFrom(factorPool, (value) => gcd(value, leftBase * bridge) === 1);
+        const rightBase = randomFrom(factorPool, (value) => value % bridge !== 0);
+        const rightDenBase = randomFrom(factorPool, (value) => gcd(value, rightBase * bridge) === 1);
+        if (!leftBase || !leftDen || !rightBase || !rightDenBase) return generateTask();
 
-      let nB = pick(extras) * (Math.random() < 0.45 ? b2 : pick([1, 2]));
-      let dD = pick(extras);
-      const B = frac(nB, b2);
-      const D = frac(b2, dD);
+        factors.push({ n: leftBase * bridge, d: leftDen, id: pairIdx * 2 });
+        factors.push({ n: rightBase, d: bridge * rightDenBase, id: pairIdx * 2 + 1 });
+      }
 
-      const signs = shuffle([1, 1, 1, 1]);
-      const negCount = pick([0, 1, 1, 2, 2]);
-      for (let i = 0; i < negCount; i++) signs[i] = -1;
+      const signs = Array(factors.length).fill(1);
+      const negChoices = [1, 1, 2, 2, Math.min(3, factors.length), Math.min(4, factors.length)];
+      const negCount = Math.min(pick(negChoices), factors.length);
+      const negIndexes = shuffle(factors.map((_, index) => index)).slice(0, negCount);
+      negIndexes.forEach((index) => { signs[index] = -1; });
 
-      const factors = [
-        { ...frac(signs[0] * A.n, A.d), id: 0 },
-        { ...frac(signs[1] * B.n, B.d), id: 1 },
-        { ...frac(signs[2] * C.n, C.d), id: 2 },
-        { ...frac(signs[3] * D.n, D.d), id: 3 },
-      ];
-      const mixed = shuffle(factors);
+      const signedFactors = factors.map((factor, index) => ({ ...frac(signs[index] * factor.n, factor.d), id: factor.id }));
+      if (signedFactors.some((factor) => factor.d === 1)) return generateTask();
+
+      const mixed = shuffle(signedFactors);
       const product = mixed.reduce((acc, f) => mul(acc, f), frac(1, 1));
-      // Keep results in a friendly range; regenerate if wild
-      if (Math.abs(product.n) > 120 || product.d !== 1) return generateTask();
+      if (Math.abs(product.n) > 240 || product.d > 48) return generateTask();
 
-      const intendedPairs = [
-        [factors[0], factors[2]],
-        [factors[1], factors[3]],
-      ];
-      return { mixed, product, intendedPairs };
+      const intendedPairs = [];
+      for (let pairIdx = 0; pairIdx < pairCount; pairIdx++) {
+        intendedPairs.push([signedFactors[pairIdx * 2], signedFactors[pairIdx * 2 + 1]]);
+      }
+      if (intendedPairs.every((pair) => pairCancels(pair[0], pair[1])) === false) return generateTask();
+      return { mixed, product, intendedPairs, pairCount };
     }
 
     function renderFactors() {
@@ -296,8 +320,7 @@
         el.className = "factor";
         el.dataset.index = i;
         const pairIdx = pairOf(i);
-        if (pairIdx === 1) el.classList.add("p1");
-        if (pairIdx === 2) el.classList.add("p2");
+        if (pairIdx) el.dataset.pair = String(pairIdx);
         el.innerHTML = `
           ${f.n < 0 ? '<span class="sign">−</span>' : ""}
           <div class="frac">
@@ -315,40 +338,74 @@
     }
 
     function pairOf(index) {
-      if (selected.length < 2) return 0;
-      if (selected.includes(index)) return 1;
-      return 2;
+      return pairAssignments[index] || 0;
     }
 
     function onPick(i) {
-      if (selected.length >= 2) return;
-      if (selected.includes(i)) return;
-      selected.push(i);
+      if (pairAssignments[i]) return;
+      if (pairCountOf(activePair) >= 2) return;
+      pairAssignments[i] = activePair;
+      if (pairCountOf(activePair) === 2) activePair = currentPair();
       renderFactors();
     }
 
     function updatePairLabel() {
-      if (selected.length < 2) {
-        pairingLabel.textContent = "Noch kein Paar gewählt. Klicke zwei Karten.";
+      if (!task) return;
+      if (!allPairsDone()) {
+        pairingLabel.textContent = "Klicke zwei Karten für Paar " + activePair + ".";
         return;
       }
-      pairingLabel.textContent = "Paar 1 und Paar 2 stehen. Rechne jedes Paar, dann das Produkt.";
+      pairingLabel.textContent = "Alle Paare stehen. Rechne jedes Paar, dann das Gesamtprodukt.";
     }
 
     function pairValues() {
-      if (selected.length < 2) return null;
-      const p1 = selected.map((i) => task.mixed[i]);
-      const p2 = task.mixed.filter((_, i) => !selected.includes(i));
-      return {
-        p1: mul(p1[0], p1[1]),
-        p2: mul(p2[0], p2[1]),
-        raw1: p1,
-        raw2: p2,
-      };
+      if (!allPairsDone()) return null;
+      const pairs = Array.from({ length: task.pairCount }, (_, index) =>
+        task.mixed.filter((_, factorIndex) => pairAssignments[factorIndex] === index + 1)
+      );
+      return pairs.map((pair) => ({ raw: pair, value: mul(pair[0], pair[1]) }));
     }
 
     function pairCancels(a, b) {
       return gcd(a.n, b.d) > 1 || gcd(b.n, a.d) > 1;
+    }
+
+    function renderLegend() {
+      if (!task) return;
+      pairLegendEl.innerHTML = "";
+      for (let pairNo = 1; pairNo <= task.pairCount; pairNo++) {
+        const item = document.createElement("span");
+        item.innerHTML = '<span class="dot ' + pairColors[pairNo] + '"></span>Paar ' + pairNo;
+        pairLegendEl.appendChild(item);
+      }
+      const note = document.createElement("span");
+      note.textContent = "Klicke immer zwei Karten pro Paar.";
+      pairLegendEl.appendChild(note);
+    }
+
+    function renderInputs() {
+      if (!task) return;
+      inputsEl.innerHTML = "";
+      for (let pairNo = 1; pairNo <= task.pairCount; pairNo++) {
+        const wrap = document.createElement("div");
+        wrap.innerHTML = `
+          <label for="in-p${pairNo}">Zwischenergebnis Paar ${pairNo}</label>
+          <input id="in-p${pairNo}" type="text" inputmode="text" placeholder="z. B. -3/2" />
+        `;
+        inputsEl.appendChild(wrap);
+      }
+      const totalWrap = document.createElement("div");
+      totalWrap.innerHTML = `
+        <label for="in-res">Gesamtergebnis</label>
+        <input id="in-res" type="text" inputmode="text" placeholder="z. B. 5/3" />
+      `;
+      inputsEl.appendChild(totalWrap);
+
+      Array.from(inputsEl.querySelectorAll("input")).forEach((input) => {
+        input.addEventListener("keydown", (e) => {
+          if (e.key === "Enter") check();
+        });
+      });
     }
 
     function showFeedback(ok, html) {
@@ -358,32 +415,29 @@
 
     function check() {
       if (!task) return;
-      if (selected.length < 2) {
-        showFeedback(false, "Bitte zuerst zwei Karten für Paar 1 wählen.");
+      if (!allPairsDone()) {
+        showFeedback(false, "Bitte erst alle " + task.pairCount + " Paare wählen.");
         return;
       }
-      const v1 = parseInput($("in-p1").value);
-      const v2 = parseInput($("in-p2").value);
+      const pairInputs = Array.from({ length: task.pairCount }, (_, index) => parseInput($("in-p" + (index + 1)).value));
       const vr = parseInput($("in-res").value);
-      if (!v1 || !v2 || !vr) {
+      if (pairInputs.some((value) => !value) || !vr) {
         showFeedback(false, "Bitte gültige Zahlen eingeben: ganze Zahl oder Bruch wie <code>-3/4</code>.");
         return;
       }
       const pairs = pairValues();
       const finalOk = eq(vr, task.product);
-      const midOk = (eq(v1, pairs.p1) && eq(v2, pairs.p2)) || (eq(v1, pairs.p2) && eq(v2, pairs.p1));
-      const clever = pairCancels(pairs.raw1[0], pairs.raw1[1]) && pairCancels(pairs.raw2[0], pairs.raw2[1]);
-      const signOk = Math.sign(v1.n) === Math.sign(pairs.p1.n || 1) || Math.sign(v1.n) === Math.sign(pairs.p2.n || 1);
+      const midOk = pairs.every((pair, index) => eq(pairInputs[index], pair.value));
+      const cleverPairs = pairs.filter((pair) => pairCancels(pair.raw[0], pair.raw[1])).length;
+      const signErrors = pairs.filter((pair, index) => Math.sign(pairInputs[index].n || 1) !== Math.sign(pair.value.n || 1)).length;
 
-      if (finalOk) {
+      if (finalOk && midOk) {
         score += 1;
         $("score").textContent = score;
-        let extra = midOk
-          ? "Zwischenergebnisse stimmen."
-          : "Das Endergebnis stimmt. Schau beim nächsten Mal noch genauer auf die Zwischenwerte.";
-        if (clever) extra += " Sehr clevere Paarung — da ließ sich gut kürzen.";
-        else extra += " Die Paarung funktioniert, kürzt aber wenig. Suche nächstes Mal gemeinsame Zahlen über Kreuz.";
-        extra += " Zwei Minus = Plus.";
+        let extra = "Alle Zwischenergebnisse stimmen.";
+        if (cleverPairs === task.pairCount) extra += " Sehr clevere Paarung — in jedem Paar ließ sich kürzen.";
+        else extra += " " + cleverPairs + " von " + task.pairCount + " Paaren waren besonders günstig zum Kürzen.";
+        extra += " Vorzeichen und Gesamtprodukt passen auch.";
         showFeedback(true, "<strong>Richtig, " + fmt(task.product) + ".</strong> " + extra);
         if (score >= 10) {
           finish();
@@ -391,13 +445,18 @@
         }
         setTimeout(nextTask, 900);
       } else {
+        const details = pairs.map((pair, index) => "Paar " + (index + 1) + ": <strong>" + fmt(pair.value) + "</strong>").join(" · ");
+        let extra = "";
+        if (!midOk && signErrors) extra = " Achte besonders auf " + signErrors + " Vorzeichenfehler.";
+        else if (!midOk) extra = " Prüfe die Zwischenergebnisse noch einmal.";
+        else extra = " Die Paare stimmen schon, aber das Gesamtprodukt noch nicht.";
         showFeedback(
           false,
           "<strong>Noch nicht.</strong> Richtiges Gesamtergebnis: <strong>" +
             fmt(task.product) +
-            "</strong>. Bei deiner Paarung wären die Zwischenwerte " +
-            fmt(pairs.p1) + " und " + fmt(pairs.p2) +
-            ". Achte aufs Kürzen und aufs Vorzeichen."
+            "</strong>. Richtige Zwischenwerte: " +
+            details +
+            "." + extra
         );
         setTimeout(nextTask, 2200);
       }
@@ -405,11 +464,11 @@
 
     function nextTask() {
       task = generateTask();
-      selected = [];
-      $("in-p1").value = "";
-      $("in-p2").value = "";
-      $("in-res").value = "";
+      pairAssignments = Array(task.mixed.length).fill(0);
+      activePair = 1;
       feedbackEl.className = "feedback";
+      renderLegend();
+      renderInputs();
       renderFactors();
     }
 
@@ -444,20 +503,16 @@
     $("btn-again").addEventListener("click", begin);
     $("btn-check").addEventListener("click", check);
     $("btn-reset-pair").addEventListener("click", () => {
-      selected = [];
+      pairAssignments = Array(task.mixed.length).fill(0);
+      activePair = 1;
       renderFactors();
     });
     $("btn-tip").addEventListener("click", () => {
       if (!task) return;
       showFeedback(
         true,
-        "Suche eine Zahl, die <em>oben in einem</em> und <em>unten in einem anderen</em> Bruch steht. Diese beiden gehören oft ins selbe Paar. Zähle die Minuszeichen: 0 oder 2 → Ergebnis positiv, 1 → negativ."
+        "Suche in jedem Paar eine Zahl, die <em>oben in einem</em> und <em>unten in einem anderen</em> Bruch steht. Zähle pro Paar die Minuszeichen: 0 oder 2 → positiv, 1 → negativ."
       );
-    });
-    ["in-p1", "in-p2", "in-res"].forEach((id) => {
-      $(id).addEventListener("keydown", (e) => {
-        if (e.key === "Enter") check();
-      });
     });
   </script>
 </body>
