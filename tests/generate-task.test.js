@@ -9,10 +9,9 @@ assert.ok(scriptMatch, "trainer script block must exist");
 const script = scriptMatch[1];
 
 function makeEl(id = "") {
-  return {
+  const element = {
     id,
     value: "",
-    innerHTML: "",
     textContent: "",
     className: "",
     dataset: {},
@@ -24,6 +23,21 @@ function makeEl(id = "") {
     addEventListener() {},
     querySelectorAll() { return []; },
   };
+  Object.defineProperty(element, "innerHTML", {
+    get() { return ""; },
+    set() { this.children = []; },
+  });
+  return element;
+}
+
+function findById(node, id) {
+  if (!node) return null;
+  if (node.id === id) return node;
+  for (const child of node.children || []) {
+    const match = findById(child, id);
+    if (match) return match;
+  }
+  return null;
 }
 
 const ids = [
@@ -33,6 +47,15 @@ const ids = [
 const elements = Object.fromEntries(ids.map((id) => [id, makeEl(id)]));
 const document = {
   getElementById(id) {
+    if (!elements[id]) {
+      for (const element of Object.values(elements)) {
+        const match = findById(element, id);
+        if (match) {
+          elements[id] = match;
+          break;
+        }
+      }
+    }
     if (!elements[id]) elements[id] = makeEl(id);
     return elements[id];
   },
@@ -71,7 +94,7 @@ for (let i = 0; i < 300; i += 1) {
   assert.ok(task.maxCleverPairs > 0 && task.maxCleverPairs <= task.pairCount, "clever-pair score must stay in range");
 
   context.__task = task;
-  vm.runInContext("task = __task; pairAssignments = Array(task.mixed.length).fill(0); score = 0;", context);
+  vm.runInContext("task = __task; pairAssignments = Array(task.mixed.length).fill(0); score = 0; renderInputs();", context);
 
   task.intendedPairs.forEach((pair, pairIndex) => {
     pair.forEach((factor) => {

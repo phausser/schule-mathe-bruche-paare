@@ -505,24 +505,36 @@
       inputsEl.innerHTML = "";
       for (let pairNo = 1; pairNo <= task.pairCount; pairNo++) {
         const wrap = document.createElement("div");
-        wrap.innerHTML = `
-          <label for="in-p${pairNo}">Zwischenergebnis Paar ${pairNo}</label>
-          <input id="in-p${pairNo}" type="text" inputmode="text" placeholder="z. B. -3/2" />
-        `;
-        inputsEl.appendChild(wrap);
-      }
-      const totalWrap = document.createElement("div");
-      totalWrap.innerHTML = `
-        <label for="in-res">Gesamtergebnis</label>
-        <input id="in-res" type="text" inputmode="text" placeholder="z. B. 5/3" />
-      `;
-      inputsEl.appendChild(totalWrap);
-
-      Array.from(inputsEl.querySelectorAll("input")).forEach((input) => {
+        const label = document.createElement("label");
+        label.htmlFor = "in-p" + pairNo;
+        label.textContent = "Zwischenergebnis Paar " + pairNo;
+        const input = document.createElement("input");
+        input.id = "in-p" + pairNo;
+        input.type = "text";
+        input.inputMode = "text";
+        input.placeholder = "z. B. -3/2";
         input.addEventListener("keydown", (e) => {
           if (e.key === "Enter") check();
         });
+        wrap.appendChild(label);
+        wrap.appendChild(input);
+        inputsEl.appendChild(wrap);
+      }
+      const totalWrap = document.createElement("div");
+      const totalLabel = document.createElement("label");
+      totalLabel.htmlFor = "in-res";
+      totalLabel.textContent = "Gesamtergebnis";
+      const totalInput = document.createElement("input");
+      totalInput.id = "in-res";
+      totalInput.type = "text";
+      totalInput.inputMode = "text";
+      totalInput.placeholder = "z. B. 5/3";
+      totalInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") check();
       });
+      totalWrap.appendChild(totalLabel);
+      totalWrap.appendChild(totalInput);
+      inputsEl.appendChild(totalWrap);
     }
 
     function showFeedback(ok, html) {
