@@ -80,18 +80,18 @@ vm.runInContext(script, context);
 
 let sawZeroNeg = false;
 let sawNegative = false;
+let sawTwoPairs = false;
 let sawThreePairs = false;
-let sawFourPairs = false;
 
 for (let i = 0; i < 300; i += 1) {
   const task = vm.runInContext("generateTask()", context);
   const negatives = task.mixed.filter((factor) => factor.n < 0).length;
   if (negatives === 0) sawZeroNeg = true;
   if (negatives > 0) sawNegative = true;
+  if (task.pairCount === 2) sawTwoPairs = true;
   if (task.pairCount === 3) sawThreePairs = true;
-  if (task.pairCount === 4) sawFourPairs = true;
 
-  assert.ok(task.pairCount >= 2 && task.pairCount <= 4, "pair count must stay between 2 and 4");
+  assert.ok(task.pairCount >= 2 && task.pairCount <= 3, "pair count must stay between 2 and 3");
   assert.strictEqual(task.mixed.length, task.pairCount * 2, "task must contain two fractions per pair");
   assert.ok(task.mixed.every((factor) => factor.d > 1), "generated factors must not have denominator 1");
   assert.ok(task.maxCleverPairs > 0 && task.maxCleverPairs <= task.pairCount, "clever-pair score must stay in range");
@@ -163,7 +163,7 @@ for (let i = 0; i < 300; i += 1) {
 
 assert.ok(sawZeroNeg, "generator should still produce tasks without negative signs");
 assert.ok(sawNegative, "generator should still produce tasks with negative signs");
+assert.ok(sawTwoPairs, "generator should produce two-pair tasks");
 assert.ok(sawThreePairs, "generator should produce three-pair tasks");
-assert.ok(sawFourPairs, "generator should produce four-pair tasks");
 
 console.log("generate-task.test.js passed");

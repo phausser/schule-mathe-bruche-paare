@@ -6,141 +6,175 @@
   <title>Kürzungs-Trainer · Klasse 7</title>
   <style>
     :root {
-      --bg: #f3efe6;
-      --ink: #1c2430;
-      --muted: #5c6774;
+      --bg: #ece7de;
+      --ink: #17202a;
+      --muted: #5a6570;
       --card: #fffdf8;
-      --line: #d8d0c0;
-      --accent: #2f6f5e;
+      --line: #d9d1c4;
+      --accent: #1f6b56;
       --accent-2: #c45c26;
-      --good: #2a7d4f;
+      --good: #1f7a45;
       --bad: #b42318;
-      --pair1: #2f6f5e;
-      --pair2: #3d5a80;
-      --shadow: 0 10px 30px rgba(28, 36, 48, .08);
+      --p1: #1f6b56;
+      --p2: #2c5d8f;
+      --p3: #6f3d9a;
+      --shadow: 0 8px 20px rgba(23, 32, 42, .06);
     }
     * { box-sizing: border-box; }
     html, body { margin: 0; min-height: 100%; }
     body {
       font-family: "Avenir Next", "Segoe UI", system-ui, sans-serif;
-      background:
-        radial-gradient(900px 400px at 10% -10%, #ffe7c8 0%, transparent 50%),
-        radial-gradient(800px 400px at 110% 0%, #d8efe6 0%, transparent 46%),
-        var(--bg);
+      background: var(--bg);
       color: var(--ink);
     }
-    .wrap { max-width: 920px; margin: 0 auto; padding: 24px 18px 48px; }
+    .wrap { max-width: 880px; margin: 0 auto; padding: 18px 16px 40px; }
     header {
-      display: flex; justify-content: space-between; align-items: flex-end;
-      gap: 16px; margin-bottom: 22px;
+      display: flex; justify-content: space-between; align-items: center;
+      gap: 16px; margin-bottom: 16px;
     }
-    h1 { font-size: 1.35rem; margin: 0; letter-spacing: -.02em; }
-    .sub { color: var(--muted); font-size: .95rem; margin-top: 4px; }
-    .stats {
-      display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end;
-    }
+    h1 { font-size: 1.2rem; margin: 0; letter-spacing: -.03em; line-height: 1.15; }
+    .sub { color: var(--muted); font-size: .82rem; margin-top: 2px; }
+    .stats { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
     .pill {
       background: var(--card); border: 1px solid var(--line);
-      border-radius: 999px; padding: 8px 14px; font-variant-numeric: tabular-nums;
-      box-shadow: var(--shadow); font-weight: 600;
+      border-radius: 999px; padding: 7px 12px; font-variant-numeric: tabular-nums;
+      box-shadow: var(--shadow); font-weight: 650; font-size: .9rem;
+      display: flex; align-items: center; gap: 8px;
     }
-    .screen { background: var(--card); border: 1px solid var(--line); border-radius: 22px; padding: 28px; box-shadow: var(--shadow); }
+    .pill .k { color: var(--muted); font-weight: 650; font-size: .75rem; text-transform: uppercase; letter-spacing: .04em; }
+    .track {
+      width: 72px; height: 6px; background: #e4ddd2; border-radius: 99px; overflow: hidden;
+    }
+    .fill { display: block; height: 100%; width: 0; background: var(--accent); border-radius: 99px; transition: width .2s ease; }
+    .screen {
+      background: var(--card); border: 1px solid var(--line); border-radius: 16px;
+      padding: 22px 22px 20px; box-shadow: var(--shadow);
+    }
+    #play.screen {
+      background: transparent; border: 0; box-shadow: none; padding: 0;
+      display: flex; flex-direction: column; gap: 12px;
+    }
     .hidden { display: none !important; }
-    p { line-height: 1.5; }
+    p { line-height: 1.45; margin: 0 0 12px; }
+    .howto { margin: 0 0 14px; padding-left: 1.15rem; }
+    .howto li { margin: 6px 0; }
     .hint-box {
-      background: #f6f1e6; border-left: 4px solid var(--accent-2);
-      padding: 12px 14px; border-radius: 10px; color: #4a4034;
+      background: #f4eee4; border-left: 3px solid var(--accent-2);
+      padding: 10px 12px; border-radius: 8px; color: #4a4034; font-size: .92rem;
     }
     button {
-      font: inherit; cursor: pointer; border: 0; border-radius: 12px;
-      padding: 12px 18px; background: var(--accent); color: #fff; font-weight: 700;
+      font: inherit; cursor: pointer; border: 0; border-radius: 10px;
+      padding: 11px 16px; background: var(--accent); color: #fff; font-weight: 700;
     }
-    button.secondary { background: #ece6da; color: var(--ink); }
+    button.secondary { background: #e8e2d6; color: var(--ink); }
     button:disabled { opacity: .45; cursor: not-allowed; }
-    .row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+    .row { display: flex; gap: 8px; flex-wrap: wrap; }
+    .block {
+      background: var(--card); border: 1px solid var(--line); border-radius: 16px;
+      padding: 14px 14px 16px; box-shadow: var(--shadow);
+    }
+    .block-head {
+      display: flex; align-items: center; gap: 10px; margin-bottom: 12px; flex-wrap: wrap;
+    }
+    .step {
+      width: 26px; height: 26px; border-radius: 50%; background: var(--ink); color: #fff;
+      display: grid; place-items: center; font-size: .8rem; font-weight: 800; flex: 0 0 auto;
+    }
+    .block-head h2 {
+      margin: 0; font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted);
+    }
+    .block-copy { flex: 1 1 180px; min-width: 0; }
     .factors {
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin: 18px 0 8px;
+      display: grid; gap: 10px; justify-content: center;
+      grid-template-columns: repeat(4, minmax(108px, 140px));
     }
+    .factors[data-count="6"] { grid-template-columns: repeat(6, minmax(96px, 128px)); }
     .factor {
-      background: #ffffff;
-      border: 3px solid #2a3340;
-      border-radius: 18px;
-      min-height: 148px;
+      background: #fff;
+      border: 1px solid #cfc7ba;
+      border-radius: 12px;
+      min-height: 128px;
       display: flex; flex-direction: column; align-items: center;
-      justify-content: center; cursor: pointer; user-select: none; transition: .15s ease;
+      justify-content: center; cursor: pointer; user-select: none;
       position: relative;
-      color: #111827;
+      color: var(--ink);
       font-weight: 800;
-      padding: 12px 8px 28px;
+      padding: 18px 8px 22px;
+      box-shadow: inset 0 4px 0 #d9d1c4;
     }
-    .factor:hover { transform: translateY(-2px); }
-    .factor[data-pair="1"] {
-      border-color: #0f3d32;
-      background: #b7ebc8;
-      color: #06281f;
+    .factor:hover { border-color: #9aa3ad; }
+    .factor[data-pair="1"] { border-color: var(--p1); background: #eef7f3; box-shadow: inset 0 5px 0 var(--p1); }
+    .factor[data-pair="2"] { border-color: var(--p2); background: #eef3fa; box-shadow: inset 0 5px 0 var(--p2); }
+    .factor[data-pair="3"] { border-color: var(--p3); background: #f6eefb; box-shadow: inset 0 5px 0 var(--p3); }
+    .frac-wrap {
+      display: flex; align-items: center; justify-content: center; gap: 5px;
     }
-    .factor[data-pair="2"] {
-      border-color: #1b3358;
-      background: #b9d4f6;
-      color: #0b1f3a;
-    }
-    .factor[data-pair="3"] {
-      border-color: #6b3fa0;
-      background: #e2ccff;
-      color: #3b0764;
-    }
-    .factor[data-pair="4"] {
-      border-color: #9a3412;
-      background: #ffd9c2;
-      color: #7c2d12;
-    }
-    .times {
-      position: absolute; right: -10px; top: 50%; transform: translateY(-50%);
-      font-weight: 800; color: var(--muted); pointer-events: none;
-    }
-    .factor:last-child .times { display: none; }
-    .frac { text-align: center; font-variant-numeric: tabular-nums; color: inherit; }
+    .frac { text-align: center; font-variant-numeric: tabular-nums; color: inherit; min-width: 2.6em; }
     .num, .den {
-      font-size: 1.7rem; font-weight: 800; padding: 2px 10px;
-      color: inherit;
+      font-size: 1.55rem; font-weight: 800; padding: 1px 4px; color: inherit;
     }
-    .bar { height: 4px; background: currentColor; width: 48px; margin: 3px auto; border-radius: 2px; }
+    .bar { height: 3px; background: currentColor; width: 100%; margin: 3px auto; border-radius: 2px; }
     .sign {
-      position: absolute; top: 8px; left: 10px; font-weight: 800;
-      color: #9a3412; font-size: 1.25rem;
+      font-size: 1.7rem; font-weight: 800; color: var(--bad); line-height: 1;
+      transform: translateY(-1px);
     }
     .tag {
-      position: absolute; bottom: 8px; font-size: .78rem; font-weight: 800; letter-spacing: .04em;
-      text-transform: uppercase; color: #1f2937;
+      position: absolute; bottom: 7px; font-size: .68rem; font-weight: 800; letter-spacing: .05em;
+      text-transform: uppercase;
     }
-    .factor[data-pair="1"] .tag { color: #064e3b; }
-    .factor[data-pair="2"] .tag { color: #1e3a8a; }
-    .factor[data-pair="3"] .tag { color: #581c87; }
-    .factor[data-pair="4"] .tag { color: #7c2d12; }
-    .pair-legend { display: flex; gap: 16px; color: var(--muted); font-size: .9rem; margin-bottom: 8px; }
-    .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 6px; }
-    .dot.p1 { background: var(--pair1); }
-    .dot.p2 { background: var(--pair2); }
-    .dot.p3 { background: #8b5cf6; }
-    .dot.p4 { background: #f97316; }
+    .factor[data-pair="1"] .tag { color: var(--p1); }
+    .factor[data-pair="2"] .tag { color: var(--p2); }
+    .factor[data-pair="3"] .tag { color: var(--p3); }
+    .pair-legend { display: flex; gap: 6px; flex-wrap: wrap; margin-left: auto; }
+    .pair-pill {
+      border: 1px solid var(--line); border-radius: 999px; padding: 4px 9px;
+      font-size: .75rem; font-weight: 750; color: var(--muted); background: #f6f1e8;
+    }
+    .pair-pill.active { color: var(--ink); border-color: var(--ink); background: #fff; }
+    .pair-pill[data-pair="1"].done { color: var(--p1); border-color: var(--p1); background: #eef7f3; }
+    .pair-pill[data-pair="2"].done { color: var(--p2); border-color: var(--p2); background: #eef3fa; }
+    .pair-pill[data-pair="3"].done { color: var(--p3); border-color: var(--p3); background: #f6eefb; }
     .inputs {
-      display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-top: 8px;
+      display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px;
     }
-    @media (max-width: 900px) { .inputs { grid-template-columns: 1fr 1fr; } }
-    @media (max-width: 720px) { .inputs { grid-template-columns: 1fr; } }
-    label { display: block; font-size: .82rem; font-weight: 700; margin-bottom: 6px; color: var(--muted); }
+    .inputs[data-count="4"] { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .field {
+      background: #f7f3eb; border: 1px solid var(--line); border-radius: 12px;
+      padding: 10px; box-shadow: inset 0 4px 0 #d9d1c4;
+    }
+    .field[data-pair="1"] { box-shadow: inset 0 4px 0 var(--p1); background: #f3f8f6; }
+    .field[data-pair="2"] { box-shadow: inset 0 4px 0 var(--p2); background: #f3f6fa; }
+    .field[data-pair="3"] { box-shadow: inset 0 4px 0 var(--p3); background: #f7f3fa; }
+    .field.total { box-shadow: inset 0 4px 0 var(--ink); background: #f1eee8; }
+    label {
+      display: block; font-size: .72rem; font-weight: 750; margin-bottom: 6px;
+      color: var(--muted); letter-spacing: .04em; text-transform: uppercase;
+    }
     input[type="text"] {
-      width: 100%; font: inherit; font-size: 1.15rem; padding: 12px 12px;
-      border: 2px solid var(--line); border-radius: 12px; background: #fff;
+      width: 100%; font: inherit; font-size: 1.12rem; padding: 10px 10px;
+      border: 1px solid #d4cdc0; border-radius: 8px; background: #fff;
     }
-    input:focus { outline: 3px solid rgba(47,111,94,.25); border-color: var(--accent); }
-    .feedback { margin-top: 16px; padding: 14px 16px; border-radius: 14px; display: none; }
+    input:focus { outline: 3px solid rgba(31,107,86,.22); border-color: var(--accent); }
+    .feedback { margin: 0; padding: 12px 14px; border-radius: 12px; display: none; }
     .feedback.show { display: block; }
     .feedback.ok { background: #e5f6ec; color: #14532d; }
     .feedback.no { background: #fde8e6; color: #7f1d1d; }
-    .win h2 { margin-top: 0; font-size: 2rem; }
-    .time-big { font-size: 2.4rem; font-weight: 800; font-variant-numeric: tabular-nums; }
-    .eq { text-align: center; color: var(--muted); margin: 6px 0 0; font-size: .95rem; }
+    .win h2 { margin: 0 0 8px; font-size: 1.8rem; }
+    .time-big { font-size: 2.2rem; font-weight: 800; font-variant-numeric: tabular-nums; margin: 4px 0 14px; }
+    .eq { text-align: left; color: var(--muted); margin: 2px 0 0; font-size: .9rem; }
+    .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    @media (max-width: 860px) {
+      .factors[data-count="6"] { grid-template-columns: repeat(3, minmax(108px, 140px)); }
+      .inputs[data-count="4"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 640px) {
+      header { flex-direction: column; align-items: stretch; gap: 10px; }
+      .stats { justify-content: flex-start; }
+      .factors, .factors[data-count="6"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .inputs, .inputs[data-count="4"] { grid-template-columns: 1fr 1fr; }
+      .field.total { grid-column: 1 / -1; }
+      .pair-legend { margin-left: 36px; }
+    }
   </style>
 </head>
 <body>
@@ -148,36 +182,56 @@
     <header>
       <div>
         <h1>Kürzungs-Trainer</h1>
-        <div class="sub">2 bis 4 Paare · clever paaren · Vorzeichen setzen</div>
+        <div class="sub">Klasse 7 · 2 oder 3 Paare · kürzen · Vorzeichen</div>
       </div>
       <div class="stats">
-        <div class="pill">Richtig: <span id="score">0</span> / 10</div>
-        <div class="pill">Zeit: <span id="clock">00:00</span></div>
+        <div class="pill">
+          <span class="k">Richtig</span>
+          <span><span id="score">0</span>/10</span>
+          <span class="track"><span class="fill" id="score-fill"></span></span>
+        </div>
+        <div class="pill"><span class="k">Zeit</span> <span id="clock">00:00</span></div>
       </div>
     </header>
 
     <section id="start" class="screen">
-      <p>Du bekommst immer ein Produkt aus <strong>2 bis 4 Paaren von Brüchen</strong>. Deine Aufgabe:</p>
-      <ol>
-        <li>Alle Paare bilden — am besten so, dass etwas <strong>weggekürzt</strong> werden kann.</li>
-        <li>Jedes Paar ausrechnen (Vorzeichen nicht vergessen).</li>
-        <li>Alle Zwischenergebnisse multiplizieren.</li>
+      <p>Du bekommst ein Produkt aus <strong>2 oder 3 Paaren</strong> von Brüchen.</p>
+      <ol class="howto">
+        <li><strong>Paaren</strong> — so, dass etwas weggekürzt werden kann.</li>
+        <li><strong>Ausrechnen</strong> — Vorzeichen nicht vergessen.</li>
+        <li><strong>Multiplizieren</strong> — alle Zwischenergebnisse.</li>
       </ol>
       <div class="hint-box">
-        Tipp wie im Unterricht: erst passende Brüche zusammenfassen, dann kürzen.<br>
-        Achte bei jedem Paar auf gemeinsame Zahlen über Kreuz – und auf die Minuszeichen.
+        Suche gemeinsame Zahlen über Kreuz. 0 oder 2 Minuszeichen → positiv, 1 → negativ.
       </div>
-      <div class="row">
+      <div class="row" style="margin-top:16px">
         <button id="btn-start">Los geht’s</button>
       </div>
     </section>
 
     <section id="play" class="screen hidden">
-      <div class="pair-legend" id="pair-legend"></div>
-      <div class="factors" id="factors"></div>
-      <p class="eq" id="pairing-label">Noch kein Paar gewählt.</p>
-      <div class="inputs" id="inputs"></div>
-      <div class="row">
+      <div class="block">
+        <div class="block-head">
+          <span class="step">1</span>
+          <div class="block-copy">
+            <h2>Paare bilden</h2>
+            <p class="eq" id="pairing-label">Noch kein Paar gewählt.</p>
+          </div>
+          <div class="pair-legend" id="pair-legend"></div>
+        </div>
+        <div class="factors" id="factors"></div>
+      </div>
+      <div class="block">
+        <div class="block-head">
+          <span class="step">2</span>
+          <div class="block-copy">
+            <h2>Ausrechnen</h2>
+            <p class="eq">Jedes Paar, dann das Gesamtprodukt.</p>
+          </div>
+        </div>
+        <div class="inputs" id="inputs"></div>
+      </div>
+      <div class="actions">
         <button id="btn-check">Prüfen</button>
         <button id="btn-reset-pair" class="secondary">Paare zurücksetzen</button>
         <button id="btn-tip" class="secondary">Tipp</button>
@@ -265,7 +319,6 @@
       return a;
     }
 
-    const pairColors = [null, "p1", "p2", "p3", "p4"];
     const factorPool = [2, 3, 4, 5, 6, 8, 9, 10, 12];
     const bridgePool = [2, 3, 4, 5, 6, 7, 8, 9];
 
@@ -341,7 +394,7 @@
 
     function generateTask() {
       for (let attempt = 0; attempt < 400; attempt++) {
-        const pairCount = pick([2, 2, 3, 3, 4]);
+        const pairCount = pick([2, 2, 3]);
         const bridges = shuffle(bridgePool).slice(0, pairCount);
         const factors = [];
         let valid = true;
@@ -360,7 +413,6 @@
         const signs = Array(factors.length).fill(1);
         const negChoices = [0, 1, 1, 2, 2];
         if (pairCount >= 3) negChoices.push(3);
-        if (pairCount >= 4) negChoices.push(4);
         const negCount = Math.min(pick(negChoices), factors.length);
         const negIndexes = shuffle(factors.map((_, index) => index)).slice(0, negCount);
         negIndexes.forEach((index) => { signs[index] = -1; });
@@ -385,6 +437,7 @@
 
     function renderFactors() {
       factorsEl.innerHTML = "";
+      factorsEl.dataset.count = String(task.mixed.length);
       task.mixed.forEach((f, i) => {
         const el = document.createElement("button");
         el.type = "button";
@@ -393,19 +446,21 @@
         const pairIdx = pairOf(i);
         if (pairIdx) el.dataset.pair = String(pairIdx);
         el.innerHTML = `
-          ${f.n < 0 ? '<span class="sign">−</span>' : ""}
-          <div class="frac">
-            <div class="num">${Math.abs(f.n)}</div>
-            <div class="bar"></div>
-            <div class="den">${f.d}</div>
+          <div class="frac-wrap">
+            ${f.n < 0 ? '<span class="sign">−</span>' : ""}
+            <div class="frac">
+              <div class="num">${Math.abs(f.n)}</div>
+              <div class="bar"></div>
+              <div class="den">${f.d}</div>
+            </div>
           </div>
-          <div class="tag">${pairIdx ? "Paar " + pairIdx : "wählen"}</div>
-          <span class="times">·</span>
+          ${pairIdx ? '<div class="tag">Paar ' + pairIdx + "</div>" : ""}
         `;
         el.addEventListener("click", () => onPick(i));
         factorsEl.appendChild(el);
       });
       updatePairLabel();
+      renderLegend();
     }
 
     function pairOf(index) {
@@ -423,10 +478,10 @@
     function updatePairLabel() {
       if (!task) return;
       if (!allPairsDone()) {
-        pairingLabel.textContent = "Klicke zwei Karten für Paar " + activePair + ".";
+        pairingLabel.textContent = "Zwei Karten für Paar " + activePair + " wählen.";
         return;
       }
-      pairingLabel.textContent = "Alle Paare stehen. Rechne jedes Paar, dann das Gesamtprodukt.";
+      pairingLabel.textContent = "Alle Paare stehen. Jetzt ausrechnen.";
     }
 
     function pairValues() {
@@ -492,22 +547,26 @@
       pairLegendEl.innerHTML = "";
       for (let pairNo = 1; pairNo <= task.pairCount; pairNo++) {
         const item = document.createElement("span");
-        item.innerHTML = '<span class="dot ' + pairColors[pairNo] + '"></span>Paar ' + pairNo;
+        const done = pairCountOf(pairNo) === 2;
+        const active = activePair === pairNo && !allPairsDone();
+        item.className = "pair-pill" + (done ? " done" : "") + (active ? " active" : "");
+        item.dataset.pair = String(pairNo);
+        item.textContent = "Paar " + pairNo;
         pairLegendEl.appendChild(item);
       }
-      const note = document.createElement("span");
-      note.textContent = "Klicke immer zwei Karten pro Paar.";
-      pairLegendEl.appendChild(note);
     }
 
     function renderInputs() {
       if (!task) return;
       inputsEl.innerHTML = "";
+      inputsEl.dataset.count = String(task.pairCount + 1);
       for (let pairNo = 1; pairNo <= task.pairCount; pairNo++) {
         const wrap = document.createElement("div");
+        wrap.className = "field";
+        wrap.dataset.pair = String(pairNo);
         const label = document.createElement("label");
         label.htmlFor = "in-p" + pairNo;
-        label.textContent = "Zwischenergebnis Paar " + pairNo;
+        label.textContent = "Paar " + pairNo;
         const input = document.createElement("input");
         input.id = "in-p" + pairNo;
         input.type = "text";
@@ -521,9 +580,10 @@
         inputsEl.appendChild(wrap);
       }
       const totalWrap = document.createElement("div");
+      totalWrap.className = "field total";
       const totalLabel = document.createElement("label");
       totalLabel.htmlFor = "in-res";
-      totalLabel.textContent = "Gesamtergebnis";
+      totalLabel.textContent = "Gesamt";
       const totalInput = document.createElement("input");
       totalInput.id = "in-res";
       totalInput.type = "text";
@@ -540,6 +600,11 @@
     function showFeedback(ok, html) {
       feedbackEl.className = "feedback show " + (ok ? "ok" : "no");
       feedbackEl.innerHTML = html;
+    }
+
+    function updateScore() {
+      $("score").textContent = score;
+      $("score-fill").style.width = (score * 10) + "%";
     }
 
     function check() {
@@ -564,7 +629,7 @@
 
       if (finalOk && midOk) {
         score += 1;
-        $("score").textContent = score;
+        updateScore();
         let extra = "Alle Zwischenergebnisse stimmen.";
         if (cleverPairs === bestCleverPairs) extra += " Sehr clevere Paarung — besser ließ sich diese Aufgabe nicht ordnen.";
         else if (cleverPairs === 0) extra += " Die Paarung stimmt, aber zum Kürzen wäre eine andere Gruppierung geschickter gewesen.";
@@ -606,7 +671,6 @@
       pairAssignments = Array(task.mixed.length).fill(0);
       activePair = 1;
       feedbackEl.className = "feedback";
-      renderLegend();
       renderInputs();
       renderFactors();
     }
@@ -620,7 +684,7 @@
 
     function begin() {
       score = 0;
-      $("score").textContent = "0";
+      updateScore();
       startedAt = Date.now();
       clearInterval(timerId);
       timerId = setInterval(tick, 250);
