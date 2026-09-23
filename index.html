@@ -230,6 +230,10 @@
       if (f.d === 1) return String(f.n);
       return f.n + "/" + f.d;
     }
+    function absFmt(f) {
+      if (f.d === 1) return String(Math.abs(f.n));
+      return Math.abs(f.n) + "/" + f.d;
+    }
     function parseInput(s) {
       const t = String(s || "").trim().replace(/\s+/g, "").replace("−", "-");
       if (!t) return null;
@@ -367,7 +371,27 @@
     }
 
     function pairCancels(a, b) {
-      return gcd(a.n, b.d) > 1 || gcd(b.n, a.d) > 1;
+      return gcd(Math.abs(a.n), Math.abs(b.d)) > 1 || gcd(Math.abs(b.n), Math.abs(a.d)) > 1;
+    }
+
+    function asCountMap(values, mapper) {
+      const counts = new Map();
+      values.forEach((value) => {
+        const key = mapper(value);
+        counts.set(key, (counts.get(key) || 0) + 1);
+      });
+      return counts;
+    }
+
+    function sameMultiset(valuesA, valuesB, mapper = fmt) {
+      if (valuesA.length !== valuesB.length) return false;
+      const left = asCountMap(valuesA, mapper);
+      const right = asCountMap(valuesB, mapper);
+      if (left.size !== right.size) return false;
+      for (const [key, count] of left.entries()) {
+        if (right.get(key) !== count) return false;
+      }
+      return true;
     }
 
     function renderLegend() {
@@ -426,10 +450,11 @@
         return;
       }
       const pairs = pairValues();
+      const expectedValues = pairs.map((pair) => pair.value);
       const finalOk = eq(vr, task.product);
-      const midOk = pairs.every((pair, index) => eq(pairInputs[index], pair.value));
+      const midOk = sameMultiset(pairInputs, expectedValues);
       const cleverPairs = pairs.filter((pair) => pairCancels(pair.raw[0], pair.raw[1])).length;
-      const signErrors = pairs.filter((pair, index) => Math.sign(pairInputs[index].n || 1) !== Math.sign(pair.value.n || 1)).length;
+      const signOnlyMismatch = !midOk && sameMultiset(pairInputs, expectedValues, absFmt);
 
       if (finalOk && midOk) {
         score += 1;
@@ -447,7 +472,7 @@
       } else {
         const details = pairs.map((pair, index) => "Paar " + (index + 1) + ": <strong>" + fmt(pair.value) + "</strong>").join(" · ");
         let extra = "";
-        if (!midOk && signErrors) extra = " Achte besonders auf " + signErrors + " Vorzeichenfehler.";
+        if (!midOk && signOnlyMismatch) extra = " Unter den Zwischenergebnissen steckt mindestens ein Vorzeichenfehler.";
         else if (!midOk) extra = " Prüfe die Zwischenergebnisse noch einmal.";
         else extra = " Die Paare stimmen schon, aber das Gesamtprodukt noch nicht.";
         showFeedback(
