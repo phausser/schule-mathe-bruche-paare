@@ -95,6 +95,13 @@ for (let i = 0; i < 300; i += 1) {
   assert.strictEqual(task.mixed.length, task.pairCount * 2, "task must contain two fractions per pair");
   assert.ok(task.mixed.every((factor) => factor.d > 1), "generated factors must not have denominator 1");
   assert.ok(task.maxCleverPairs > 0 && task.maxCleverPairs <= task.pairCount, "clever-pair score must stay in range");
+  task.intendedPairs.forEach((pair) => {
+    const value = vm.runInContext(`mul(${JSON.stringify(pair[0])}, ${JSON.stringify(pair[1])})`, context);
+    assert.ok(
+      Math.abs(value.n) >= 1 && Math.abs(value.n) <= 9 && value.d >= 1 && value.d <= 9,
+      "a correct pair must reduce to a single-digit numerator and denominator"
+    );
+  });
 
   context.__task = task;
   vm.runInContext("task = __task; pairAssignments = Array(task.mixed.length).fill(0); score = 0; renderInputs();", context);

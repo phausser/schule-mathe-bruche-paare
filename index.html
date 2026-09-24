@@ -433,6 +433,11 @@
       ];
     }
 
+    function pairResultIsSingleDigit(pair) {
+      const value = mul(pair[0], pair[1]);
+      return value.n !== 0 && Math.abs(value.n) <= 9 && value.d <= 9;
+    }
+
     function pairHasCrossCancellation(a, b) {
       return gcd(Math.abs(a.n), Math.abs(b.d)) > 1 || gcd(Math.abs(b.n), Math.abs(a.d)) > 1;
     }
@@ -488,16 +493,18 @@
         const signedFactors = factors.map((factor, index) => ({ ...frac(signs[index] * factor.n, factor.d), id: factor.id }));
         if (signedFactors.some((factor) => factor.d === 1)) continue;
 
+        const intendedPairs = [];
+        for (let pairIdx = 0; pairIdx < pairCount; pairIdx++) {
+          intendedPairs.push([signedFactors[pairIdx * 2], signedFactors[pairIdx * 2 + 1]]);
+        }
+        if (!intendedPairs.every(pairResultIsSingleDigit)) continue;
+
         const mixed = shuffle(signedFactors);
         const product = mixed.reduce((acc, f) => mul(acc, f), frac(1, 1));
         if (Math.abs(product.n) > 240 || product.d > 48) continue;
         const maxCleverPairs = maxCancellablePairs(signedFactors);
         if (maxCleverPairs === 0) continue;
 
-        const intendedPairs = [];
-        for (let pairIdx = 0; pairIdx < pairCount; pairIdx++) {
-          intendedPairs.push([signedFactors[pairIdx * 2], signedFactors[pairIdx * 2 + 1]]);
-        }
         return { mixed, product, intendedPairs, pairCount, maxCleverPairs };
       }
       return fallbackTask();

@@ -52,6 +52,7 @@ Jede Aufgabe wird so gebaut, dass eine „Brücken-Paarung“ existiert:
 
 - Pro Paar eine Brückenzahl (z. B. 5 oder 7), die je einmal im Zähler und einmal im Nenner **verschiedener** Faktoren steht.
 - Die übrigen Zähler/Nenner sind kleine ganze Zahlen aus \(\{2,3,4,5,6,8,10,12\}\).
+- Nach dem Kürzen jedes richtigen Paares sind Zähler und Nenner einstellig (Betrag 1 bis 9). Das Gesamtergebnis darf danach größer sein.
 - Einige Faktoren können negativ sein; bei zwei Paaren höchstens zwei, bei drei Paaren höchstens drei.
 - Nach dem Mischen der Karten muss der Schüler die zusammengehörigen Paare selbst finden.
 
