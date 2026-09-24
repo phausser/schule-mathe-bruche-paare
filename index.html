@@ -6,25 +6,31 @@
   <title>Kürzungs-Trainer · Klasse 7</title>
   <style>
     :root {
-      --bg: #ece7de;
-      --ink: #17202a;
-      --muted: #5a6570;
-      --card: #fffdf8;
-      --line: #d9d1c4;
-      --accent: #1f6b56;
-      --accent-2: #c45c26;
-      --good: #1f7a45;
-      --bad: #b42318;
-      --p1: #1f6b56;
-      --p2: #2c5d8f;
-      --p3: #6f3d9a;
-      --shadow: 0 8px 20px rgba(23, 32, 42, .06);
+      --bg: #efeaff;
+      --ink: #241b45;
+      --muted: #655b86;
+      --card: #ffffff;
+      --line: #e3daf8;
+      --accent: #5b3df5;
+      --accent-deep: #3c22b8;
+      --accent-2: #ff8a3d;
+      --good: #14804a;
+      --bad: #e11d48;
+      --p1: #0c8f62;
+      --p2: #2563eb;
+      --p3: #c026d3;
+      --sun: #ffe14d;
+      --shadow: 0 10px 28px rgba(68, 40, 140, .08);
     }
     * { box-sizing: border-box; }
     html, body { margin: 0; min-height: 100%; }
     body {
-      font-family: "Avenir Next", "Segoe UI", system-ui, sans-serif;
-      background: var(--bg);
+      font-family: ui-rounded, "Avenir Next", "Trebuchet MS", "Segoe UI", sans-serif;
+      background:
+        radial-gradient(880px 420px at -8% -18%, #ffd4ef 0%, transparent 56%),
+        radial-gradient(760px 460px at 112% -12%, #c9d8ff 0%, transparent 52%),
+        radial-gradient(680px 380px at 50% 118%, #d8ffe9 0%, transparent 50%),
+        var(--bg);
       color: var(--ink);
     }
     .wrap { max-width: 880px; margin: 0 auto; padding: 18px 16px 40px; }
@@ -32,22 +38,34 @@
       display: flex; justify-content: space-between; align-items: center;
       gap: 16px; margin-bottom: 16px;
     }
-    h1 { font-size: 1.2rem; margin: 0; letter-spacing: -.03em; line-height: 1.15; }
-    .sub { color: var(--muted); font-size: .82rem; margin-top: 2px; }
+    h1 {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 1.45rem; margin: 0; letter-spacing: -.03em; line-height: 1.1;
+    }
+    .mark {
+      width: 36px; height: 36px; border-radius: 12px; flex: 0 0 auto;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      background: linear-gradient(180deg, #8d78ff, var(--accent));
+      color: #fff; font-size: .68rem; font-weight: 800; line-height: 1;
+      box-shadow: 0 3px 0 var(--accent-deep); gap: 1px;
+    }
+    .mark i { font-style: normal; }
+    .mark i + i { border-top: 2px solid #fff; padding-top: 1px; }
+    .sub { color: var(--muted); font-size: .88rem; margin-top: 4px; font-weight: 650; }
     .stats { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
     .pill {
-      background: var(--card); border: 1px solid var(--line);
+      background: var(--card); border: 2px solid #fff;
       border-radius: 999px; padding: 7px 12px; font-variant-numeric: tabular-nums;
-      box-shadow: var(--shadow); font-weight: 650; font-size: .9rem;
+      box-shadow: var(--shadow); font-weight: 800; font-size: .95rem;
       display: flex; align-items: center; gap: 8px;
     }
-    .pill .k { color: var(--muted); font-weight: 650; font-size: .75rem; text-transform: uppercase; letter-spacing: .04em; }
+    .pill .k { color: var(--accent); font-weight: 800; font-size: .78rem; }
     .track {
-      width: 72px; height: 6px; background: #e4ddd2; border-radius: 99px; overflow: hidden;
+      width: 72px; height: 8px; background: #e7e0f8; border-radius: 99px; overflow: hidden;
     }
-    .fill { display: block; height: 100%; width: 0; background: var(--accent); border-radius: 99px; transition: width .2s ease; }
+    .fill { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #22c58b, var(--accent)); border-radius: 99px; transition: width .2s ease; }
     .screen {
-      background: var(--card); border: 1px solid var(--line); border-radius: 16px;
+      background: rgba(255, 255, 255, .94); border: 2px solid #fff; border-radius: 28px;
       padding: 22px 22px 20px; box-shadow: var(--shadow);
     }
     #play.screen {
@@ -56,33 +74,61 @@
     }
     .hidden { display: none !important; }
     p { line-height: 1.45; margin: 0 0 12px; }
-    .howto { margin: 0 0 14px; padding-left: 1.15rem; }
-    .howto li { margin: 6px 0; }
+    .howto {
+      list-style: none; margin: 0 0 14px; padding: 0;
+      counter-reset: how; display: grid; gap: 8px;
+    }
+    .howto li {
+      counter-increment: how;
+      display: flex; gap: 10px; align-items: flex-start;
+      margin: 0; background: #f6f3ff; border-radius: 16px; padding: 10px 12px;
+    }
+    .howto li::before {
+      content: counter(how);
+      flex: 0 0 auto; width: 26px; height: 26px; border-radius: 50%;
+      display: grid; place-items: center;
+      background: var(--accent); color: #fff; font-weight: 800; font-size: .82rem;
+      box-shadow: 0 2px 0 var(--accent-deep);
+    }
     .hint-box {
-      background: #f4eee4; border-left: 3px solid var(--accent-2);
-      padding: 10px 12px; border-radius: 8px; color: #4a4034; font-size: .92rem;
+      background: #fff6cc; border: 2px solid #f0d15a; border-left: 6px solid #f0b429;
+      padding: 12px 14px; border-radius: 16px; color: #4a3b10; font-size: .95rem;
     }
     button {
-      font: inherit; cursor: pointer; border: 0; border-radius: 10px;
-      padding: 11px 16px; background: var(--accent); color: #fff; font-weight: 700;
+      font: inherit; cursor: pointer; border: 0; border-radius: 999px;
+      padding: 12px 18px; background: linear-gradient(180deg, #8d78ff, var(--accent));
+      color: #fff; font-weight: 800; box-shadow: 0 4px 0 var(--accent-deep);
     }
-    button.secondary { background: #e8e2d6; color: var(--ink); }
+    button:active { transform: translateY(2px); box-shadow: 0 2px 0 var(--accent-deep); }
+    button.secondary {
+      background: #fff; color: var(--ink); border: 2px solid var(--line);
+      box-shadow: 0 4px 0 #ddd4f3;
+    }
+    button.secondary:active { box-shadow: 0 2px 0 #ddd4f3; }
+    button.tip {
+      background: linear-gradient(180deg, #fff1a8, var(--sun));
+      color: #3b2a00; box-shadow: 0 4px 0 #e2b400;
+    }
+    button.tip:active { box-shadow: 0 2px 0 #e2b400; }
     button:disabled { opacity: .45; cursor: not-allowed; }
-    .row { display: flex; gap: 8px; flex-wrap: wrap; }
+    button:focus-visible, .factor:focus-visible {
+      outline: 3px solid rgba(91, 61, 245, .35); outline-offset: 2px;
+    }
+    .row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px; }
     .block {
-      background: var(--card); border: 1px solid var(--line); border-radius: 16px;
+      background: rgba(255, 255, 255, .94); border: 2px solid #fff; border-radius: 24px;
       padding: 14px 14px 16px; box-shadow: var(--shadow);
     }
     .block-head {
       display: flex; align-items: center; gap: 10px; margin-bottom: 12px; flex-wrap: wrap;
     }
     .step {
-      width: 26px; height: 26px; border-radius: 50%; background: var(--ink); color: #fff;
-      display: grid; place-items: center; font-size: .8rem; font-weight: 800; flex: 0 0 auto;
+      width: 28px; height: 28px; border-radius: 50%;
+      background: linear-gradient(180deg, #8d78ff, var(--accent)); color: #fff;
+      display: grid; place-items: center; font-size: .85rem; font-weight: 800; flex: 0 0 auto;
+      box-shadow: 0 3px 0 var(--accent-deep);
     }
-    .block-head h2 {
-      margin: 0; font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted);
-    }
+    .block-head h2 { margin: 0; font-size: 1.05rem; letter-spacing: -.02em; color: var(--ink); }
     .block-copy { flex: 1 1 180px; min-width: 0; }
     .factors {
       display: grid; gap: 10px; justify-content: center;
@@ -91,35 +137,47 @@
     .factors[data-count="6"] { grid-template-columns: repeat(6, minmax(96px, 128px)); }
     .factor {
       background: #fff;
-      border: 1px solid #cfc7ba;
-      border-radius: 12px;
-      min-height: 128px;
+      border: 3px solid #2d2648;
+      border-radius: 20px;
+      min-height: 136px;
       display: flex; flex-direction: column; align-items: center;
       justify-content: center; cursor: pointer; user-select: none;
       position: relative;
       color: var(--ink);
       font-weight: 800;
-      padding: 18px 8px 22px;
-      box-shadow: inset 0 4px 0 #d9d1c4;
+      padding: 18px 8px 24px;
+      box-shadow: 0 5px 0 #d9d0ee;
     }
-    .factor:hover { border-color: #9aa3ad; }
-    .factor[data-pair="1"] { border-color: var(--p1); background: #eef7f3; box-shadow: inset 0 5px 0 var(--p1); }
-    .factor[data-pair="2"] { border-color: var(--p2); background: #eef3fa; box-shadow: inset 0 5px 0 var(--p2); }
-    .factor[data-pair="3"] { border-color: var(--p3); background: #f6eefb; box-shadow: inset 0 5px 0 var(--p3); }
+    @media (hover: hover) {
+      .factor:hover { transform: translateY(-3px); }
+    }
+    .factor:active { transform: translateY(2px); box-shadow: 0 2px 0 #d9d0ee; }
+    .factor[data-pair="1"] { border-color: var(--p1); background: #c9f8e4; box-shadow: 0 5px 0 var(--p1); }
+    .factor[data-pair="2"] { border-color: var(--p2); background: #d7e6ff; box-shadow: 0 5px 0 var(--p2); }
+    .factor[data-pair="3"] { border-color: var(--p3); background: #f8d7ff; box-shadow: 0 5px 0 var(--p3); }
+    .factor[data-pair="1"]:active { box-shadow: 0 2px 0 var(--p1); }
+    .factor[data-pair="2"]:active { box-shadow: 0 2px 0 var(--p2); }
+    .factor[data-pair="3"]:active { box-shadow: 0 2px 0 var(--p3); }
+    .factor.pop { animation: pop .35s ease; }
+    @keyframes pop {
+      0% { transform: scale(.92); }
+      55% { transform: scale(1.06); }
+      100% { transform: scale(1); }
+    }
     .frac-wrap {
       display: flex; align-items: center; justify-content: center; gap: 5px;
     }
     .frac { text-align: center; font-variant-numeric: tabular-nums; color: inherit; min-width: 2.6em; }
     .num, .den {
-      font-size: 1.55rem; font-weight: 800; padding: 1px 4px; color: inherit;
+      font-size: 1.7rem; font-weight: 800; padding: 1px 4px; color: inherit;
     }
-    .bar { height: 3px; background: currentColor; width: 100%; margin: 3px auto; border-radius: 2px; }
+    .bar { height: 4px; background: currentColor; width: 100%; margin: 3px auto; border-radius: 2px; }
     .sign {
-      font-size: 1.7rem; font-weight: 800; color: var(--bad); line-height: 1;
+      font-size: 1.85rem; font-weight: 800; color: var(--bad); line-height: 1;
       transform: translateY(-1px);
     }
     .tag {
-      position: absolute; bottom: 7px; font-size: .68rem; font-weight: 800; letter-spacing: .05em;
+      position: absolute; bottom: 8px; font-size: .72rem; font-weight: 800; letter-spacing: .04em;
       text-transform: uppercase;
     }
     .factor[data-pair="1"] .tag { color: var(--p1); }
@@ -127,42 +185,47 @@
     .factor[data-pair="3"] .tag { color: var(--p3); }
     .pair-legend { display: flex; gap: 6px; flex-wrap: wrap; margin-left: auto; }
     .pair-pill {
-      border: 1px solid var(--line); border-radius: 999px; padding: 4px 9px;
-      font-size: .75rem; font-weight: 750; color: var(--muted); background: #f6f1e8;
+      border: 2px solid var(--line); border-radius: 999px; padding: 4px 10px;
+      font-size: .78rem; font-weight: 800; color: var(--muted); background: #f6f3ff;
     }
     .pair-pill.active { color: var(--ink); border-color: var(--ink); background: #fff; }
-    .pair-pill[data-pair="1"].done { color: var(--p1); border-color: var(--p1); background: #eef7f3; }
-    .pair-pill[data-pair="2"].done { color: var(--p2); border-color: var(--p2); background: #eef3fa; }
-    .pair-pill[data-pair="3"].done { color: var(--p3); border-color: var(--p3); background: #f6eefb; }
+    .pair-pill[data-pair="1"].done { color: #075c40; border-color: var(--p1); background: #c9f8e4; }
+    .pair-pill[data-pair="2"].done { color: #1e3a8a; border-color: var(--p2); background: #d7e6ff; }
+    .pair-pill[data-pair="3"].done { color: #86198f; border-color: var(--p3); background: #f8d7ff; }
     .inputs {
       display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px;
     }
     .inputs[data-count="4"] { grid-template-columns: repeat(4, minmax(0, 1fr)); }
     .field {
-      background: #f7f3eb; border: 1px solid var(--line); border-radius: 12px;
-      padding: 10px; box-shadow: inset 0 4px 0 #d9d1c4;
+      background: #f6f3ff; border: 2px solid #fff; border-radius: 16px;
+      padding: 10px; box-shadow: inset 0 4px 0 #ddd4f6;
     }
-    .field[data-pair="1"] { box-shadow: inset 0 4px 0 var(--p1); background: #f3f8f6; }
-    .field[data-pair="2"] { box-shadow: inset 0 4px 0 var(--p2); background: #f3f6fa; }
-    .field[data-pair="3"] { box-shadow: inset 0 4px 0 var(--p3); background: #f7f3fa; }
-    .field.total { box-shadow: inset 0 4px 0 var(--ink); background: #f1eee8; }
+    .field[data-pair="1"] { box-shadow: inset 0 4px 0 var(--p1); background: #eefbf5; }
+    .field[data-pair="2"] { box-shadow: inset 0 4px 0 var(--p2); background: #eef4ff; }
+    .field[data-pair="3"] { box-shadow: inset 0 4px 0 var(--p3); background: #fdf2ff; }
+    .field.total { box-shadow: inset 0 4px 0 var(--accent); background: #f4f0ff; }
     label {
-      display: block; font-size: .72rem; font-weight: 750; margin-bottom: 6px;
-      color: var(--muted); letter-spacing: .04em; text-transform: uppercase;
+      display: block; font-size: .82rem; font-weight: 800; margin-bottom: 6px;
+      color: var(--muted);
     }
     input[type="text"] {
-      width: 100%; font: inherit; font-size: 1.12rem; padding: 10px 10px;
-      border: 1px solid #d4cdc0; border-radius: 8px; background: #fff;
+      width: 100%; font: inherit; font-size: 1.15rem; font-weight: 750; padding: 10px 10px;
+      border: 2px solid #e4dcf6; border-radius: 12px; background: #fff;
     }
-    input:focus { outline: 3px solid rgba(31,107,86,.22); border-color: var(--accent); }
-    .feedback { margin: 0; padding: 12px 14px; border-radius: 12px; display: none; }
+    input:focus { outline: 3px solid rgba(91, 61, 245, .22); border-color: var(--accent); }
+    input.tipped { background: #fff8d8; border-color: #e2b400; }
+    .feedback { margin: 0; padding: 12px 14px; border-radius: 16px; display: none; font-weight: 650; }
     .feedback.show { display: block; }
-    .feedback.ok { background: #e5f6ec; color: #14532d; }
-    .feedback.no { background: #fde8e6; color: #7f1d1d; }
-    .win h2 { margin: 0 0 8px; font-size: 1.8rem; }
-    .time-big { font-size: 2.2rem; font-weight: 800; font-variant-numeric: tabular-nums; margin: 4px 0 14px; }
-    .eq { text-align: left; color: var(--muted); margin: 2px 0 0; font-size: .9rem; }
+    .feedback.ok { background: #d9fbe8; color: #14532d; }
+    .feedback.no { background: #ffe1e6; color: #7f1d1d; }
+    .feedback.tip { background: #fff6cc; color: #4a3b10; border: 2px solid #f0d15a; }
+    .win h2 { margin: 0 0 8px; font-size: 2rem; }
+    .time-big { font-size: 2.4rem; font-weight: 800; font-variant-numeric: tabular-nums; margin: 4px 0 14px; color: var(--accent); }
+    .eq { text-align: left; color: var(--muted); margin: 2px 0 0; font-size: .92rem; font-weight: 650; }
     .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    @media (prefers-reduced-motion: reduce) {
+      .factor.pop { animation: none; }
+    }
     @media (max-width: 860px) {
       .factors[data-count="6"] { grid-template-columns: repeat(3, minmax(108px, 140px)); }
       .inputs[data-count="4"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -173,7 +236,7 @@
       .factors, .factors[data-count="6"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .inputs, .inputs[data-count="4"] { grid-template-columns: 1fr 1fr; }
       .field.total { grid-column: 1 / -1; }
-      .pair-legend { margin-left: 36px; }
+      .pair-legend { margin-left: 38px; }
     }
   </style>
 </head>
@@ -181,7 +244,7 @@
   <div class="wrap">
     <header>
       <div>
-        <h1>Kürzungs-Trainer</h1>
+        <h1><span class="mark" aria-hidden="true"><i>1</i><i>2</i></span>Kürzungs-Trainer</h1>
         <div class="sub">Klasse 7 · 2 oder 3 Paare · kürzen · Vorzeichen</div>
       </div>
       <div class="stats">
@@ -203,8 +266,9 @@
       </ol>
       <div class="hint-box">
         Suche gemeinsame Zahlen über Kreuz. 0 oder 2 Minuszeichen → positiv, 1 → negativ.
+        Mit Tipp gibt es für diese Aufgabe keinen Punkt.
       </div>
-      <div class="row" style="margin-top:16px">
+      <div class="row">
         <button id="btn-start">Los geht’s</button>
       </div>
     </section>
@@ -233,8 +297,8 @@
       </div>
       <div class="actions">
         <button id="btn-check">Prüfen</button>
+        <button id="btn-tip" class="tip">Tipp</button>
         <button id="btn-reset-pair" class="secondary">Paare zurücksetzen</button>
-        <button id="btn-tip" class="secondary">Tipp</button>
       </div>
       <div id="feedback" class="feedback"></div>
     </section>
@@ -267,6 +331,10 @@
     let task = null;
     let pairAssignments = [];
     let activePair = 1;
+    let tipStep = 0;
+    let poppedPair = 0;
+    let tipInputs = [];
+    let tipUsed = false;
 
     function gcd(a, b) {
       a = Math.abs(a); b = Math.abs(b);
@@ -445,6 +513,7 @@
         el.dataset.index = i;
         const pairIdx = pairOf(i);
         if (pairIdx) el.dataset.pair = String(pairIdx);
+        if (pairIdx && pairIdx === poppedPair) el.classList.add("pop");
         el.innerHTML = `
           <div class="frac-wrap">
             ${f.n < 0 ? '<span class="sign">−</span>' : ""}
@@ -470,6 +539,7 @@
     function onPick(i) {
       if (pairAssignments[i]) return;
       if (pairCountOf(activePair) >= 2) return;
+      poppedPair = 0;
       pairAssignments[i] = activePair;
       if (pairCountOf(activePair) === 2) activePair = currentPair();
       renderFactors();
@@ -597,9 +667,98 @@
       inputsEl.appendChild(totalWrap);
     }
 
-    function showFeedback(ok, html) {
-      feedbackEl.className = "feedback show " + (ok ? "ok" : "no");
+    function showFeedback(ok, html, kind) {
+      feedbackEl.className = "feedback show " + (kind || (ok ? "ok" : "no"));
       feedbackEl.innerHTML = html;
+    }
+
+    function setTipInput(id, value) {
+      const input = $(id);
+      if (!input) return;
+      input.value = value;
+      if (input.classList) input.classList.add("tipped");
+      if (!tipInputs.includes(id)) tipInputs.push(id);
+    }
+
+    function clearTipInputs() {
+      tipInputs.forEach((id) => {
+        const input = $(id);
+        if (!input) return;
+        input.value = "";
+        if (input.classList) input.classList.remove("tipped");
+      });
+      tipInputs = [];
+    }
+
+    function applyRevealedPairs(count) {
+      const forced = new Map();
+      for (let step = 0; step < count; step++) {
+        const pairNo = step + 1;
+        const intended = task.intendedPairs[step];
+        task.mixed.forEach((factor, index) => {
+          if (intended.some((item) => item.id === factor.id)) forced.set(index, pairNo);
+        });
+      }
+      forced.forEach((pairNo, index) => {
+        pairAssignments[index] = pairNo;
+      });
+      for (let pairNo = 1; pairNo <= count; pairNo++) {
+        for (let index = 0; index < pairAssignments.length; index++) {
+          if (!forced.has(index) && pairAssignments[index] === pairNo) pairAssignments[index] = 0;
+        }
+      }
+    }
+
+    function tipSummary() {
+      const parts = task.intendedPairs.map((pair, index) =>
+        "Paar " + (index + 1) + ": <strong>" + escapeHtml(fmt(mul(pair[0], pair[1]))) + "</strong>"
+      );
+      return parts.join(" · ") + " · Gesamt: <strong>" + escapeHtml(fmt(task.product)) + "</strong>.";
+    }
+
+    function revealTip() {
+      if (!task) return;
+      tipUsed = true;
+      const noPoint = " Mit Tipp gibt es keinen Punkt. Die Aufgabe gilt als nicht gelöst.";
+      if (tipStep >= task.pairCount) {
+        applyRevealedPairs(task.pairCount);
+        task.intendedPairs.forEach((pair, index) => {
+          setTipInput("in-p" + (index + 1), fmt(mul(pair[0], pair[1])));
+        });
+        setTipInput("in-res", fmt(task.product));
+        poppedPair = 0;
+        activePair = currentPair();
+        renderFactors();
+        showFeedback(true, "<strong>Lösung gezeigt.</strong> " + tipSummary() + noPoint, "tip");
+        return;
+      }
+
+      tipStep += 1;
+      applyRevealedPairs(tipStep);
+      const pair = task.intendedPairs[tipStep - 1];
+      const value = mul(pair[0], pair[1]);
+      setTipInput("in-p" + tipStep, fmt(value));
+      let html = "<strong>Paar " + tipStep + " von " + task.pairCount + " gefunden.</strong> Diese beiden Karten gehören zusammen. Ergebnis: <strong>" + escapeHtml(fmt(value)) + "</strong>.";
+      if (tipStep === task.pairCount) {
+        setTipInput("in-res", fmt(task.product));
+        html += " Gesamtergebnis: <strong>" + escapeHtml(fmt(task.product)) + "</strong>.";
+      }
+      html += noPoint;
+      poppedPair = tipStep;
+      activePair = currentPair();
+      renderFactors();
+      showFeedback(true, html, "tip");
+    }
+
+    function resetPairs() {
+      if (!task) return;
+      pairAssignments = Array(task.mixed.length).fill(0);
+      activePair = 1;
+      tipStep = 0;
+      poppedPair = 0;
+      clearTipInputs();
+      feedbackEl.className = "feedback";
+      renderFactors();
     }
 
     function updateScore() {
@@ -626,6 +785,12 @@
       const cleverPairs = pairs.filter((pair) => pairHasCrossCancellation(pair.raw[0], pair.raw[1])).length;
       const bestCleverPairs = task.maxCleverPairs || task.pairCount;
       const signOnlyMismatch = !midOk && isSignOnlyMismatch(pairInputs, expectedValues);
+
+      if (finalOk && midOk && tipUsed) {
+        showFeedback(false, "<strong>Kein Punkt.</strong> Mit Tipp gilt diese Aufgabe als nicht gelöst.");
+        setTimeout(nextTask, 2200);
+        return;
+      }
 
       if (finalOk && midOk) {
         score += 1;
@@ -670,6 +835,10 @@
       task = generateTask();
       pairAssignments = Array(task.mixed.length).fill(0);
       activePair = 1;
+      tipStep = 0;
+      poppedPair = 0;
+      tipInputs = [];
+      tipUsed = false;
       feedbackEl.className = "feedback";
       renderInputs();
       renderFactors();
@@ -705,18 +874,8 @@
     $("btn-start").addEventListener("click", begin);
     $("btn-again").addEventListener("click", begin);
     $("btn-check").addEventListener("click", check);
-    $("btn-reset-pair").addEventListener("click", () => {
-      pairAssignments = Array(task.mixed.length).fill(0);
-      activePair = 1;
-      renderFactors();
-    });
-    $("btn-tip").addEventListener("click", () => {
-      if (!task) return;
-      showFeedback(
-        true,
-        "Suche in jedem Paar eine Zahl, die <em>oben in einem</em> und <em>unten in einem anderen</em> Bruch steht. Zähle pro Paar die Minuszeichen: 0 oder 2 → positiv, 1 → negativ."
-      );
-    });
+    $("btn-reset-pair").addEventListener("click", resetPairs);
+    $("btn-tip").addEventListener("click", revealTip);
   </script>
 </body>
 </html>

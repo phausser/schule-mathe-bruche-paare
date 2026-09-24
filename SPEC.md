@@ -27,6 +27,7 @@ Jede Paarung ist rechnerisch gültig. Eine **clevere** Paarung ist eine, bei der
 - Das Gesamtergebnis ist immer eine **kleine ganze Zahl** (typisch zwischen −80 und 80).
 - Mindestens eine Paarung kürzt „sichtbar“ (Zähler eines Faktors trifft Nenner eines anderen).
 - Falsche Eingaben zählen nicht als Sieg-Punkt. Die Aufgabe wird erklärt und eine neue generiert.
+- Wer **Tipp** benutzt, bekommt für diese Aufgabe keinen Punkt. Sie gilt als nicht gelöst, auch wenn Paare und Gesamtergebnis stimmen. **Paare zurücksetzen** blendet die Hilfe wieder aus, holt den Punkt für diese Aufgabe aber nicht zurück.
 - Feedback nennt explizit:
   - ob die gewählte Paarung gut kürzt
   - ob Vorzeichen stimmen
@@ -58,7 +59,7 @@ Auswertung intern mit gekürzten Brüchen (Zähler/Nenner als ganze Zahlen, Vorz
 
 ## Bewertung einer Abgabe
 
-Eine Aufgabe gilt als **richtig**, wenn das **Gesamtergebnis** exakt dem Produkt entspricht.
+Eine Aufgabe gilt als **richtig**, wenn das **Gesamtergebnis** exakt dem Produkt entspricht und in dieser Aufgabe kein **Tipp** benutzt wurde.
 
 Zusätzliches qualitatives Feedback (zählt nicht für den Sieg, steuert die Rückmeldung):
 

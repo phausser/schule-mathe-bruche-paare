@@ -166,4 +166,130 @@ assert.ok(sawNegative, "generator should still produce tasks with negative signs
 assert.ok(sawTwoPairs, "generator should produce two-pair tasks");
 assert.ok(sawThreePairs, "generator should produce three-pair tasks");
 
+for (let i = 0; i < 40; i += 1) {
+  const task = vm.runInContext("generateTask()", context);
+  context.__task = task;
+  vm.runInContext(`
+    task = __task;
+    pairAssignments = Array(task.mixed.length).fill(0);
+    activePair = 1;
+    tipStep = 0;
+    poppedPair = 0;
+    tipInputs = [];
+    tipUsed = false;
+    score = 0;
+    renderInputs();
+  `, context);
+
+  for (let pairNo = 1; pairNo <= task.pairCount; pairNo += 1) {
+    document.getElementById(`in-p${pairNo}`).value = "";
+  }
+  document.getElementById("in-res").value = "";
+
+  task.intendedPairs[0].forEach((factor) => {
+    const index = task.mixed.findIndex((item) => item.id === factor.id);
+    vm.runInContext(`pairAssignments[${index}] = 2;`, context);
+  });
+
+  for (let step = 1; step <= task.pairCount; step += 1) {
+    vm.runInContext("revealTip()", context);
+    task.intendedPairs[step - 1].forEach((factor) => {
+      const index = task.mixed.findIndex((item) => item.id === factor.id);
+      assert.strictEqual(
+        vm.runInContext(`pairAssignments[${index}]`, context),
+        step,
+        "tip must place the intended cards into the revealed pair"
+      );
+    });
+    const expected = vm.runInContext(
+      `fmt(mul(task.intendedPairs[${step - 1}][0], task.intendedPairs[${step - 1}][1]))`,
+      context
+    );
+    assert.strictEqual(document.getElementById(`in-p${step}`).value, expected, "tip must fill the pair result");
+    const feedback = document.getElementById("feedback").innerHTML;
+    assert.match(feedback, new RegExp("Paar " + step + " von " + task.pairCount));
+    assert.match(feedback, /keinen Punkt/, "tip feedback must say the task scores no point");
+    assert.match(feedback, /nicht gelöst/);
+    if (step < task.pairCount) {
+      assert.strictEqual(document.getElementById("in-res").value, "", "total stays empty until the last pair");
+      assert.strictEqual(document.getElementById(`in-p${step + 1}`).value, "", "later pairs stay untouched");
+      assert.doesNotMatch(feedback, /Gesamtergebnis/);
+      task.intendedPairs[step].forEach((factor) => {
+        const index = task.mixed.findIndex((item) => item.id === factor.id);
+        assert.strictEqual(vm.runInContext(`pairAssignments[${index}]`, context), 0);
+      });
+    } else {
+      assert.strictEqual(
+        document.getElementById("in-res").value,
+        vm.runInContext("fmt(task.product)", context),
+        "last tip must fill the total"
+      );
+      assert.match(feedback, /Gesamtergebnis/);
+    }
+  }
+
+  vm.runInContext("score = 3; check()", context);
+  assert.strictEqual(vm.runInContext("score", context), 3, "a tipped solution must not score");
+  assert.match(document.getElementById("feedback").innerHTML, /Kein Punkt/);
+  assert.match(document.getElementById("feedback").innerHTML, /nicht gelöst/);
+  assert.doesNotMatch(document.getElementById("feedback").innerHTML, /Richtig,/);
+
+  vm.runInContext("revealTip()", context);
+  assert.strictEqual(document.getElementById("in-res").value, vm.runInContext("fmt(task.product)", context));
+  assert.match(document.getElementById("feedback").innerHTML, /Lösung gezeigt/);
+  assert.match(document.getElementById("feedback").innerHTML, /nicht gelöst/);
+  assert.doesNotMatch(document.getElementById("feedback").innerHTML, /Alles gelöst/);
+
+  vm.runInContext("resetPairs()", context);
+  assert.strictEqual(vm.runInContext("tipStep", context), 0);
+  assert.strictEqual(vm.runInContext("tipUsed", context), true, "reset must not give the point back");
+  assert.ok(vm.runInContext("pairAssignments.every((value) => value === 0)", context));
+  assert.strictEqual(document.getElementById("in-p1").value, "");
+  assert.strictEqual(document.getElementById("in-res").value, "");
+}
+
+{
+  const task = vm.runInContext("generateTask()", context);
+  context.__task = task;
+  vm.runInContext(`
+    task = __task;
+    pairAssignments = Array(task.mixed.length).fill(0);
+    activePair = 1;
+    tipStep = 0;
+    poppedPair = 0;
+    tipInputs = [];
+    tipUsed = false;
+    score = 4;
+    renderInputs();
+  `, context);
+
+  function fillSolvedTask() {
+    task.intendedPairs.forEach((pair, pairIndex) => {
+      pair.forEach((factor) => {
+        const index = task.mixed.findIndex((item) => item.id === factor.id);
+        vm.runInContext(`pairAssignments[${index}] = ${pairIndex + 1};`, context);
+      });
+      document.getElementById(`in-p${pairIndex + 1}`).value = vm.runInContext(
+        `fmt(mul(task.intendedPairs[${pairIndex}][0], task.intendedPairs[${pairIndex}][1]))`,
+        context
+      );
+    });
+    document.getElementById("in-res").value = vm.runInContext("fmt(task.product)", context);
+  }
+
+  vm.runInContext("revealTip()", context);
+  fillSolvedTask();
+  vm.runInContext("check()", context);
+  assert.strictEqual(vm.runInContext("score", context), 4, "one tip is enough to withhold the point");
+  assert.match(document.getElementById("feedback").innerHTML, /nicht gelöst/);
+
+  vm.runInContext("resetPairs()", context);
+  fillSolvedTask();
+  vm.runInContext("check()", context);
+  assert.strictEqual(vm.runInContext("score", context), 4, "the same task stays unsolved after reset");
+
+  vm.runInContext("tipUsed = false; check()", context);
+  assert.strictEqual(vm.runInContext("score", context), 5, "without a tip the same solution scores");
+}
+
 console.log("generate-task.test.js passed");
